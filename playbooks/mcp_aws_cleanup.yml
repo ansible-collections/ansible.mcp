@@ -1,0 +1,76 @@
+---
+- name: AWS IAM MCP Demo Cleanup
+  hosts: aws_iam_server
+  gather_facts: false
+  vars_prompt:
+    - name: confirm_cleanup
+      prompt: "Are you sure you want to delete demo AWS IAM resources? (yes/no)"
+      private: false
+      
+  tasks:
+    - name: Abort if not confirmed
+      ansible.builtin.fail:
+        msg: "Cleanup aborted by user"
+      when: confirm_cleanup != "yes"
+      
+    # List users to find demo users
+    - name: List all IAM users
+      ansible.mcp.mcp_run_tools:
+        tool_name: list_users
+        tool_args: {}
+      register: all_users
+      
+    # Find demo users (those with 'ansible-demo-user' prefix)
+    - name: Identify demo users to delete
+      ansible.builtin.set_fact:
+        demo_users: "{{ all_users.result.content.users | selectattr('user_name', 'match', '^ansible-demo-user-.*') | list }}"
+        
+    - name: Display demo users found
+      ansible.builtin.debug:
+        msg: "Found {{ demo_users | length }} demo users to clean up: {{ demo_users | map(attribute='user_name') | list }}"
+        
+    # Clean up each demo user
+    - name: Clean up demo users
+      include_tasks: cleanup_user.yml
+      vars:
+        user_name: "{{ item.user_name }}"
+      loop: "{{ demo_users }}"
+      when: demo_users | length > 0
+      
+    # List groups to find demo groups
+    - name: List all IAM groups
+      ansible.mcp.mcp_run_tools:
+        tool_name: list_groups
+        tool_args: {}
+      register: all_groups
+      
+    # Find demo groups (those with 'ansible-demo-group' prefix)
+    - name: Identify demo groups to delete
+      ansible.builtin.set_fact:
+        demo_groups: "{{ all_groups.result.content.groups | selectattr('group_name', 'match', '^ansible-demo-group-.*') | list }}"
+        
+    - name: Display demo groups found
+      ansible.builtin.debug:
+        msg: "Found {{ demo_groups | length }} demo groups to clean up: {{ demo_groups | map(attribute='group_name') | list }}"
+        
+    # Delete demo groups
+    - name: Delete demo groups
+      ansible.mcp.mcp_run_tools:
+        tool_name: delete_group
+        tool_args:
+          group_name: "{{ item.group_name }}"
+      loop: "{{ demo_groups }}"
+      when: demo_groups | length > 0
+      ignore_errors: true
+      register: group_deletions
+      
+    - name: Display cleanup summary
+      ansible.builtin.debug:
+        msg: |
+          AWS IAM Demo Cleanup Summary:
+          ============================
+          🗑️  Deleted {{ demo_users | length }} demo users
+          🗑️  Deleted {{ demo_groups | length }} demo groups
+          ✅ Cleanup completed successfully!
+          
+          Note: All associated resources (policies, access keys) were also removed.

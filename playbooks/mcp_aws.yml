@@ -1,0 +1,236 @@
+---
+- name: AWS IAM MCP Server Integration Demo
+  hosts: aws_iam_server
+  gather_facts: false
+  tasks:
+    # Discover available AWS IAM tools
+    - name: List all available AWS IAM tools
+      ansible.mcp.mcp_get_tools:
+      register: aws_tools
+
+    - name: Display number of AWS IAM tools available
+      ansible.builtin.debug:
+        msg: "Found {{ aws_tools.tool_count }} AWS IAM tools available"
+
+    # List existing IAM users
+    - name: List existing IAM users
+      ansible.mcp.mcp_run_tools:
+        tool_name: list_users
+        tool_args: {}
+      register: existing_users
+
+    - name: Display existing users count
+      ansible.builtin.debug:
+        msg: "Found {{ existing_users.result.content.users | length }} existing IAM users"
+
+    # Create a new IAM user
+    - name: Create a new IAM user
+      ansible.mcp.mcp_run_tools:
+        tool_name: create_user
+        tool_args:
+          user_name: "ansible-demo-user-{{ ansible_date_time.epoch }}"
+          path: "/demo/"
+          tags:
+            - key: "Environment"
+              value: "Demo"
+            - key: "CreatedBy"
+              value: "Ansible-MCP"
+            - key: "Purpose"
+              value: "MCP-Integration-Test"
+      register: new_user
+
+    - name: Display created user details
+      ansible.builtin.debug:
+        msg: "Created user: {{ new_user.result.content.user.user_name }} with ARN: {{ new_user.result.content.user.arn }}"
+
+    # Get user details
+    - name: Get details of the newly created user
+      ansible.mcp.mcp_run_tools:
+        tool_name: get_user
+        tool_args:
+          user_name: "{{ new_user.result.content.user.user_name }}"
+      register: user_details
+
+    - name: Display user details
+      ansible.builtin.debug:
+        msg: "User {{ user_details.result.content.user.user_name }} created on {{ user_details.result.content.user.create_date }}"
+
+    # Create a custom inline policy for the user
+    - name: Create inline policy for the user
+      ansible.mcp.mcp_run_tools:
+        tool_name: put_user_policy
+        tool_args:
+          user_name: "{{ new_user.result.content.user.user_name }}"
+          policy_name: "DemoS3ReadOnlyPolicy"
+          policy_document: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:ListBucket"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::demo-bucket",
+                    "arn:aws:s3:::demo-bucket/*"
+                  ]
+                }
+              ]
+            }
+      register: policy_created
+      
+    - name: Confirm policy creation
+      ansible.builtin.debug:
+        msg: "Inline policy 'DemoS3ReadOnlyPolicy' created for user {{ new_user.result.content.user.user_name }}"
+      when: policy_created is succeeded
+      
+    # List user policies
+    - name: List inline policies for the user
+      ansible.mcp.mcp_run_tools:
+        tool_name: list_user_policies
+        tool_args:
+          user_name: "{{ new_user.result.content.user.user_name }}"
+      register: user_policies
+
+    - name: Display user policies
+      ansible.builtin.debug:
+        msg: "User has {{ user_policies.result.content.policy_names | length }} inline policies: {{ user_policies.result.content.policy_names }}"
+
+    # Retrieve the policy we just created
+    - name: Get the inline policy details
+      ansible.mcp.mcp_run_tools:
+        tool_name: get_user_policy
+        tool_args:
+          user_name: "{{ new_user.result.content.user.user_name }}"
+          policy_name: "DemoS3ReadOnlyPolicy"
+      register: policy_details
+
+    - name: Display policy document
+      ansible.builtin.debug:
+        msg: "Policy document retrieved successfully for {{ policy_details.result.content.policy_name }}"
+
+    # Test policy simulation (security feature)
+    - name: Simulate policy permissions
+      ansible.mcp.mcp_run_tools:
+        tool_name: simulate_principal_policy
+        tool_args:
+          policy_source_arn: "{{ new_user.result.content.user.arn }}"
+          action_names:
+            - "s3:GetObject"
+            - "s3:PutObject"  # This should be denied
+          resource_arns:
+            - "arn:aws:s3:::demo-bucket/test-file.txt"
+      register: simulation_results
+
+    - name: Display simulation results
+      ansible.builtin.debug:
+        msg: "Policy simulation completed. Check results for {{ simulation_results.result.content.evaluation_results | length }} actions"
+
+    # Create access keys for the user (be careful with this in production!)
+    - name: Create access key for the user
+      ansible.mcp.mcp_run_tools:
+        tool_name: create_access_key
+        tool_args:
+          user_name: "{{ new_user.result.content.user.user_name }}"
+      register: access_key
+
+    - name: "Display access key info (WARNING: Secret shown only once!)"
+      ansible.builtin.debug:
+        msg: "Access Key ID: {{ access_key.result.content.access_key.access_key_id }} (Secret access key is only shown once and should be stored securely)"
+
+    # List access keys for the user
+    - name: List access keys for the user
+      ansible.mcp.mcp_run_tools:
+        tool_name: list_access_keys
+        tool_args:
+          user_name: "{{ new_user.result.content.user.user_name }}"
+      register: user_access_keys
+
+    - name: Display access keys count
+      ansible.builtin.debug:
+        msg: "User has {{ user_access_keys.result.content.access_key_metadata | length }} access keys"
+
+    # Create a demo IAM group
+    - name: Create a demo IAM group
+      ansible.mcp.mcp_run_tools:
+        tool_name: create_group
+        tool_args:
+          group_name: "ansible-demo-group-{{ ansible_date_time.epoch }}"
+          path: "/demo/"
+      register: new_group
+      ignore_errors: true
+
+    - name: Display group creation result
+      ansible.builtin.debug:
+        msg: "Group creation: {{ 'SUCCESS' if new_group is succeeded else 'FAILED - ' + new_group.msg }}"
+
+    # Add user to group (if group was created successfully)
+    - name: Add user to the demo group
+      ansible.mcp.mcp_run_tools:
+        tool_name: add_user_to_group
+        tool_args:
+          group_name: "{{ new_group.result.content.group.group_name }}"
+          user_name: "{{ new_user.result.content.user.user_name }}"
+      register: user_added_to_group
+      when: new_group is succeeded
+      ignore_errors: true
+
+    - name: Confirm user added to group
+      ansible.builtin.debug:
+        msg: "User {{ new_user.result.content.user.user_name }} added to group {{ new_group.result.content.group.group_name }}"
+      when: new_group is succeeded and user_added_to_group is succeeded
+      
+    # List IAM roles (read-only operation)
+    - name: List existing IAM roles
+      ansible.mcp.mcp_run_tools:
+        tool_name: list_roles
+        tool_args: {}
+      register: existing_roles
+      
+    - name: Display roles count
+      ansible.builtin.debug:
+        msg: "Found {{ existing_roles.result.content.roles | length }} existing IAM roles"
+        
+    # List IAM policies
+    - name: List customer managed policies
+      ansible.mcp.mcp_run_tools:
+        tool_name: list_policies
+        tool_args:
+          scope: "Local"
+          only_attached: false
+      register: managed_policies
+
+    - name: Display managed policies count
+      ansible.builtin.debug:
+        msg: "Found {{ managed_policies.result.content.policies | length }} customer managed policies"
+
+    # Final summary
+    - name: Display demo summary
+      ansible.builtin.debug:
+        msg: |
+          AWS IAM MCP Integration Demo Summary:
+          ====================================
+          ✅ Connected to AWS IAM MCP Server
+          ✅ Discovered {{ aws_tools.tool_count }} available tools
+          ✅ Created IAM user: {{ new_user.result.content.user.user_name }}
+          ✅ Created inline policy: DemoS3ReadOnlyPolicy
+          ✅ Generated access key (ID: {{ access_key.result.content.access_key.access_key_id }})
+          ✅ Performed policy simulation
+          {{ '✅ Created IAM group: ' + new_group.result.content.group.group_name if new_group is succeeded else '❌ Group creation failed' }}
+          ✅ Listed {{ existing_users.result.content.users | length }} existing users
+          ✅ Listed {{ existing_roles.result.content.roles | length }} existing roles
+          ✅ Listed {{ managed_policies.result.content.policies | length }} managed policies
+
+          🔧 Tools demonstrated:
+          - list_users, create_user, get_user
+          - put_user_policy, list_user_policies, get_user_policy
+          - create_access_key, list_access_keys
+          - simulate_principal_policy (security testing)
+          - create_group, add_user_to_group
+          - list_roles, list_policies
+
+          ⚠️  IMPORTANT: This demo created real AWS resources!
+          💰 Remember to clean up resources to avoid charges.
+          🔐 Store access keys securely and rotate them regularly.

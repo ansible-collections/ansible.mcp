@@ -1,0 +1,53 @@
+{
+  "all": {
+    "children": {
+      "ungrouped": {},
+      "mcp_servers": {}
+    }
+  },
+  "mcp_servers": {
+    "hosts": {
+      "github_server": {
+        "ansible_connection": "ansible.mcp.mcp",
+        "ansible_mcp_server_path": "<change_to_your_mcp_server_path>",
+        "ansible_mcp_server_args": ["stdio"],
+        "ansible_mcp_server_env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "<change_to_your_github_pat>"
+        }
+      },
+      "aws_iam_server": {
+        "ansible_connection": "ansible.mcp.mcp",
+        "ansible_mcp_server_path": "<change_to_your_mcp_server_path>",
+        "ansible_mcp_server_args": ["--readonly"],
+        "ansible_mcp_server_env": {
+          "AWS_REGION": "us-east-1",
+          "AWS_PROFILE": "default"
+        }
+      }
+    }
+  },
+  "ungrouped": {
+    "hosts": {}
+  },
+  "_meta": {
+    "hostvars": {
+      "github_server": {
+        "ansible_connection": "ansible.mcp.mcp",
+        "ansible_mcp_server_path": "<change_to_your_mcp_server_path>",
+        "ansible_mcp_server_args": ["stdio"],
+        "ansible_mcp_server_env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "<change_to_your_github_pat>"
+        }
+      },
+      "aws_iam_server": {
+        "ansible_connection": "ansible.mcp.mcp",
+        "ansible_mcp_server_path": "<change_to_your_mcp_server_path>",
+        "ansible_mcp_server_args": ["--readonly"],
+        "ansible_mcp_server_env": {
+          "AWS_REGION": "us-east-1",
+          "AWS_PROFILE": "default"
+        }
+      }
+    }
+  }
+}

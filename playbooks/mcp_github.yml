@@ -1,0 +1,25 @@
+---
+- name: MCP Server Integration Demo
+  hosts: github_server
+  gather_facts: false
+  tasks:
+    # Discover available tools
+    - name: List all available tools
+      ansible.mcp.mcp_get_tools:
+      register: available_tools
+
+    # Execute a tool
+    - name: Create GitHub issue
+      ansible.mcp.mcp_run_tools:
+        tool_name: create_issue
+        tool_args:
+          owner: ganeshrn
+          repo: mcp-demo
+          title: "Automated Issue-1"
+          body: "Created by Ansible Playbook"
+      register: new_issue
+
+    # Use results in subsequent tasks
+    - name: Display issue URL
+      ansible.builtin.debug:
+        msg: "Created issue: {{ new_issue.result.content.url }}"
