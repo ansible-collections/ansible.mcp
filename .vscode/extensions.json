@@ -1,5 +1,3 @@
 {
-  "recommendations": [
-    "redhat.ansible"
-  ]
+  "recommendations": ["redhat.ansible", "redhat.vscode-redhat-account"]
 }

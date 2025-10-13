@@ -1,26 +1,40 @@
 ---
+# This collection is initialized by https://github.com/ansible/ansible-creator 25.9.0
+
 # See https://docs.ansible.com/ansible/latest/dev_guide/collections_galaxy_meta.html
 
-namespace: community
-name: FIXME
-version: 0.1.0
+namespace: "ansible"
+name: "mcp"
+version: 1.0.0
 readme: README.md
 authors:
-  - YOUR NAME (github.com/YOURGITHUB)
-description: null
+  - Ansible (https://github.com/ansible)
+
+description: An Ansible collection for interacting with MCP servers.
 license_file: LICENSE
-tags:
-  # tags so people can search for collections https://galaxy.ansible.com/search
-  # tags are all lower-case, no spaces, no dashes.
-  - example1
-  - example2
-  # You must have one of the tags in the following link
-  # to satisfy Ansible Lint https://ansible.readthedocs.io/projects/lint/rules/galaxy
-repository: https://github.com/ansible-collections/community.REPO_NAME
-# documentation: https://github.com/ansible-collection-migration/community.REPO_NAME/tree/main/docs
-homepage: https://github.com/ansible-collections/community.REPO_NAME
-issues: https://github.com/ansible-collections/community.REPO_NAME/issues
+
+# TO-DO: update the tags based on your content type
+tags: ["mcp", "ai"]
+
+# TO-DO: maintain this list to reflect the collection's dependencies
+dependencies:
+  "ansible.utils": "*" # note: "*" selects the latest version available
+
+repository: https://github.com/ansible-collections/ansible.mcp
+documentation: https://github.com/ansible-collections/ansible.mcp
+homepage: https://github.com/ansible-collections/ansible.mcp
+issues: https://github.com/ansible-collections/ansible.mcp/issues
+
+# A list of file glob-like patterns used to filter any files or directories that should not be included in the build
+# artifact. A pattern is matched from the relative path of the file or directory of the collection directory. This
+# uses 'fnmatch' to match the files or directories. Some directories and files like 'galaxy.yml', '*.pyc', '*.retry',
+# and '.git' are always filtered. Mutually exclusive with 'manifest'
 build_ignore:
-  # https://docs.ansible.com/ansible/devel/dev_guide/developing_collections_distributing.html#ignoring-files-and-folders
   - .gitignore
   - changelogs/.plugin-cache.yaml
+# A dict controlling use of manifest directives used in building the collection artifact. The key 'directives' is a
+# list of MANIFEST.in style
+# L(directives,https://packaging.python.org/en/latest/guides/using-manifest-in/#manifest-in-commands). The key
+# 'omit_default_directives' is a boolean that controls whether the default directives are used. Mutually exclusive
+# with 'build_ignore'
+# manifest: null
