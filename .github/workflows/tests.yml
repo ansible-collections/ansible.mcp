@@ -1,0 +1,84 @@
+---
+name: "CI"
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  # TO-DO: Below is an example cron scheduler. Uncomment and tweak it as per your requirement
+  # schedule:
+    # - cron: '0 0 * * *'
+
+jobs:
+  build-import:
+    uses: ansible/ansible-content-actions/.github/workflows/build_import.yaml@main
+  sanity:
+    uses: ansible/ansible-content-actions/.github/workflows/sanity.yaml@main
+    with:
+      extra_matrix_entries: >
+        [
+          {
+            "description": "Sanity tests using ansible-core 2.16 and python 3.10",
+            "factors": ["sanity", "py3.10", "2.16"],
+            "name": "sanity-py3.10-2.16",
+            "python": "3.10"
+          },
+          {
+            "description": "Sanity tests using ansible-core 2.16 and python 3.11",
+            "factors": ["sanity", "py3.11", "2.16"],
+            "name": "sanity-py3.11-2.16",
+            "python": "3.11"
+          },
+          {
+            "description": "Sanity tests using ansible-core 2.16 and python 3.12",
+            "factors": ["sanity", "py3.12", "2.16"],
+            "name": "sanity-py3.12-2.16",
+            "python": "3.12"
+          }
+        ]
+  unit-galaxy:
+    uses: ansible/ansible-content-actions/.github/workflows/unit.yaml@main
+    with:
+      extra_matrix_entries: >
+          [
+            {
+              "description": "Sanity tests using ansible-core 2.16 and python 3.10",
+              "factors": ["unit", "py3.10", "2.16"],
+              "name": "unit-py3.10-2.16",
+              "python": "3.10"
+            },
+            {
+              "description": "Sanity tests using ansible-core 2.16 and python 3.11",
+              "factors": ["unit", "py3.11", "2.16"],
+              "name": "unit-py3.11-2.16",
+              "python": "3.11"
+            },
+            {
+              "description": "Sanity tests using ansible-core 2.16 and python 3.12",
+              "factors": ["unit", "py3.12", "2.16"],
+              "name": "unit-py3.12-2.16",
+              "python": "3.12"
+            }
+          ]
+  all_green:
+    if: ${{ always() }}
+    needs:
+      - changelog
+      - build-import
+      - sanity
+      - unit-galaxy
+      - ansible-lint
+    runs-on: ubuntu-latest
+    steps:
+      - run: >-
+          python -c "assert 'failure' not in
+          set([
+          '${{ needs.changelog.result }}',
+          '${{ needs.sanity.result }}',
+          '${{ needs.unit-galaxy.result }}'
+          '${{ needs.ansible-lint.result }}'
+          ])"
