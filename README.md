@@ -1,4 +1,4 @@
-# Ansible Mcp Collection
+# Ansible MCP Collection
 
 This repository contains the `ansible.mcp` Ansible Collection.
 
