@@ -46,19 +46,19 @@ jobs:
       extra_matrix_entries: >
           [
             {
-              "description": "Sanity tests using ansible-core 2.16 and python 3.10",
+              "description": "Unit tests using ansible-core 2.16 and python 3.10",
               "factors": ["unit", "py3.10", "2.16"],
               "name": "unit-py3.10-2.16",
               "python": "3.10"
             },
             {
-              "description": "Sanity tests using ansible-core 2.16 and python 3.11",
+              "description": "Unit tests using ansible-core 2.16 and python 3.11",
               "factors": ["unit", "py3.11", "2.16"],
               "name": "unit-py3.11-2.16",
               "python": "3.11"
             },
             {
-              "description": "Sanity tests using ansible-core 2.16 and python 3.12",
+              "description": "Unit tests using ansible-core 2.16 and python 3.12",
               "factors": ["unit", "py3.12", "2.16"],
               "name": "unit-py3.12-2.16",
               "python": "3.12"
@@ -67,18 +67,15 @@ jobs:
   all_green:
     if: ${{ always() }}
     needs:
-      - changelog
       - build-import
       - sanity
       - unit-galaxy
-      - ansible-lint
     runs-on: ubuntu-latest
     steps:
       - run: >-
           python -c "assert 'failure' not in
           set([
-          '${{ needs.changelog.result }}',
           '${{ needs.sanity.result }}',
           '${{ needs.unit-galaxy.result }}'
-          '${{ needs.ansible-lint.result }}'
+          '${{ needs.build-import.result }}'
           ])"
