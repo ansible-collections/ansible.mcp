@@ -24,7 +24,7 @@ jobs:
           python-version: 3.12
 
       - name: Install tox
-        run: pip3.11 install tox
+        run: pip3.12 install tox
 
       - name: Run all linters
         run: tox -e linters
