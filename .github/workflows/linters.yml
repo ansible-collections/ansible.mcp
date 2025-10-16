@@ -1,0 +1,30 @@
+---
+name: linters
+
+env:
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches: [main]
+
+jobs:
+  linters:
+    name: Run Linters
+    runs-on: ubuntu-latest
+    permissions:
+      # contents:read is required to checkout the repository source code
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install tox
+        run: pip3.12 install tox
+
+      - name: Run all linters
+        run: tox -e linters
