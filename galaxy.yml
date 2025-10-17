@@ -14,7 +14,7 @@ description: An Ansible collection for interacting with MCP servers.
 license_file: LICENSE
 
 # TO-DO: update the tags based on your content type
-tags: ["mcp", "ai"]
+tags: ["mcp", "ai", "application"]
 
 # TO-DO: maintain this list to reflect the collection's dependencies
 dependencies:
