@@ -50,6 +50,7 @@ class Transport(ABC):
         """
         pass
 
+
 class MCPClient:
     """Client for communicating with MCP (Model Context Protocol) servers.
 
@@ -97,9 +98,7 @@ class MCPClient:
             "params": {
                 "protocolVersion": "2025-03-26",
                 "capabilities": {
-                    "roots": {
-                        "listChanged": True
-                        },
+                    "roots": {"listChanged": True},
                     "sampling": {},
                 },
                 "clientInfo": {
@@ -115,7 +114,9 @@ class MCPClient:
         if "result" in response:
             self._server_info = response["result"]
         else:
-            raise Exception(f"Initialization failed: {response.get('error', 'Error in initialization')}")
+            raise Exception(
+                f"Initialization failed: {response.get('error', 'Error in initialization')}"
+            )
 
         # Send initialized notification
         initialized_notification = {
@@ -150,7 +151,9 @@ class MCPClient:
             self._tools_cache = response["result"]
             return self._tools_cache
         else:
-            raise Exception(f"Failed to list tools: {response.get('error', 'Error in listing tools')}")
+            raise Exception(
+                f"Failed to list tools: {response.get('error', 'Error in listing tools')}"
+            )
 
     def get_tool(self, tool: str) -> Dict[str, Any]:
         """Get the definition of a specific tool.
@@ -201,7 +204,9 @@ class MCPClient:
         if "result" in response:
             return response["result"]
         else:
-            raise Exception(f"Failed to call tool '{tool}': {response.get('error', 'Error in tool call')}")
+            raise Exception(
+                f"Failed to call tool '{tool}': {response.get('error', 'Error in tool call')}"
+            )
 
     def server_info(self) -> Dict[str, Any]:
         """Return cached server information from initialization.
@@ -238,18 +243,26 @@ class MCPClient:
 
         # Validate schema supports object type
         if schema_type and schema_type != "object":
-            raise ValueError(f"Tool '{tool}' has unsupported schema type '{schema_type}', expected 'object'")
+            raise ValueError(
+                f"Tool '{tool}' has unsupported schema type '{schema_type}', expected 'object'"
+            )
 
         # Check for missing required parameters
         missing_required = [param for param in required_parameters if param not in kwargs]
         if missing_required:
-            raise ValueError(f"Tool '{tool}' missing required parameters: {', '.join(missing_required)}")
+            raise ValueError(
+                f"Tool '{tool}' missing required parameters: {', '.join(missing_required)}"
+            )
 
         # Check for unknown parameters
         if parameters_from_schema_properties:
-            unknown_parameters = [param for param in kwargs if param not in parameters_from_schema_properties]
+            unknown_parameters = [
+                param for param in kwargs if param not in parameters_from_schema_properties
+            ]
             if unknown_parameters:
-                raise ValueError(f"Tool '{tool}' received unknown parameters: {', '.join(unknown_parameters)}")
+                raise ValueError(
+                    f"Tool '{tool}' received unknown parameters: {', '.join(unknown_parameters)}"
+                )
 
         # Validate parameter types
         for parameter_name, parameter_value in kwargs.items():
