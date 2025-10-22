@@ -9,6 +9,8 @@ from functools import wraps
 from typing import Any, Callable, Optional, Union
 
 from ansible.errors import AnsibleConnectionFailure
+from ansible.module_utils.urls import open_url
+
 
 
 class Transport(ABC):
@@ -209,3 +211,129 @@ class Stdio(Transport):
                 raise AnsibleConnectionFailure(f"Error closing MCP process: {str(e)}")
             finally:
                 self._process = None
+
+
+class StreamableHTTP(Transport):
+    def __init__(self, url: str, headers: Optional[dict] = None):
+        """Initialize the StreamableHTTP transport.
+
+        Args:
+            url: The MCP server URL endpoint
+            headers: Optional headers to include with requests
+            session_id: Optional session ID to include with requests
+        """
+        self.url = url
+        self.headers = headers or {}
+        self.session_id = None
+
+    def connect(self) -> None:
+        """Connect to the MCP server.
+
+        For HTTP transport, this is a no-op as connection is established
+        per-request.
+        """
+        pass
+
+    def notify(self, data: dict) -> None:
+        """Send a notification message to the server.
+
+        Args:
+            data: JSON-RPC payload.
+        """
+        headers = self._build_headers()
+
+        try:
+            response = open_url(
+                self.url,
+                method="POST",
+                data=json.dumps(data),
+                headers=headers,
+                validate_certs=False,
+            )
+
+            # Check for session ID in response headers
+            self._extract_session_id(response)
+
+            # For notifications, we expect 202 Accepted
+            if response.getcode() != 202:
+                raise Exception(f"Unexpected response code: {response.getcode()}")
+
+        except Exception as e:
+            raise Exception(f"Failed to send notification: {str(e)}")
+
+    def request(self, data: dict) -> dict:
+        """Send a request to the server.
+
+        Args:
+            data: JSON-RPC payload.
+
+        Returns:
+            The JSON-RPC response from the server.
+        """
+        headers = self._build_headers()
+
+        try:
+            response = open_url(
+                self.url,
+                method="POST",
+                data=json.dumps(data),
+                headers=headers,
+                validate_certs=False,
+            )
+
+            # Check for session ID in response headers
+            self._extract_session_id(response)
+
+            # Read the response body
+            response_data = response.read()
+
+            if response.getcode() != 200:
+                raise Exception(f"Unexpected response code: {response.getcode()}")
+
+            # Parse JSON response
+            try:
+                return json.loads(response_data.decode("utf-8"))
+            except json.JSONDecodeError as e:
+                raise Exception(f"Invalid JSON response: {str(e)}")
+
+        except Exception as e:
+            raise Exception(f"Failed to send request: {str(e)}")
+
+    def close(self) -> None:
+        """Close the server connection.
+
+        For HTTP transport, this is a no-op as connections are not persistent.
+        """
+        pass
+
+    def _build_headers(self) -> dict:
+        """Build headers for HTTP requests.
+
+        Returns:
+            Dictionary of headers to include in the request.
+        """
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/event-stream",
+            "MCP-Protocol-Version": "2025-06-18",
+        }
+
+        # Add custom headers
+        headers.update(self.headers)
+
+        # Add session ID if available
+        if self.session_id:
+            headers["Mcp-Session-Id"] = self.session_id
+
+        return headers
+
+    def _extract_session_id(self, response) -> None:
+        """Extract session ID from response headers.
+
+        Args:
+            response: The HTTP response object
+        """
+        # Check for Mcp-Session-Id header in response
+        session_header = response.headers.get("Mcp-Session-Id")
+        if session_header:
+            self.session_id = session_header
