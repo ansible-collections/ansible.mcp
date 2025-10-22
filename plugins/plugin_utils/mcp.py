@@ -70,7 +70,6 @@ class Transport(ABC):
         """
         pass
 
-
 class Stdio(Transport):
     def __init__(self, cmd: Union[list[str], str], env: Optional[dict] = None):
         """Initialize the stdio transport class.
@@ -348,7 +347,6 @@ class StreamableHTTP(Transport):
         session_header = response.headers.get("Mcp-Session-Id")
         if session_header is not None:
             self._session_id = session_header
-
 
 class MCPClient:
     """Client for communicating with MCP (Model Context Protocol) servers.
