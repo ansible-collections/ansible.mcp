@@ -9,7 +9,6 @@ from typing import Any, Dict, Optional
 from ansible_collections.ansible.mcp.plugins.plugin_utils.errors import MCPError
 from ansible_collections.ansible.mcp.plugins.plugin_utils.transport import Transport
 
-
 class MCPClient:
     """Client for communicating with MCP (Model Context Protocol) servers.
 
