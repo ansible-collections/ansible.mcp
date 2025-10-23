@@ -4,9 +4,10 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import json
-import pytest
 
 from unittest.mock import Mock, patch
+
+import pytest
 
 from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import StreamableHTTP
 
