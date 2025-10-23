@@ -88,10 +88,8 @@ class StreamableHTTP(Transport):
                 validate_certs=False,
             )
 
-            # Check for session ID in response headers
             self._extract_session_id(response)
 
-            # For notifications, we expect 202 Accepted
             if response.getcode() != 202:
                 raise Exception(f"Unexpected response code: {response.getcode()}")
 
@@ -118,10 +116,8 @@ class StreamableHTTP(Transport):
                 validate_certs=False,
             )
 
-            # Check for session ID in response headers
             self._extract_session_id(response)
 
-            # Read the response body
             response_data = response.read()
 
             if response.getcode() != 200:
@@ -172,5 +168,5 @@ class StreamableHTTP(Transport):
         """
         # Check for Mcp-Session-Id header in response
         session_header = response.headers.get("Mcp-Session-Id")
-        if session_header:
+        if session_header is not None:
             self.session_id = session_header
