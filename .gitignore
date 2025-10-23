@@ -1,5 +1,6 @@
 # https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 # Byte-compiled / optimized / DLL files
+tests/integration/inventory
 __pycache__/
 *.py[cod]
 *$py.class
