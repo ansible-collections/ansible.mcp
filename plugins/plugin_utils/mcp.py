@@ -6,7 +6,7 @@ import time
 
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Dict,Optional, Union
 
 from ansible.errors import AnsibleConnectionFailure
 from ansible.module_utils.urls import open_url
@@ -214,17 +214,18 @@ class Stdio(Transport):
 
 
 class StreamableHTTP(Transport):
-    def __init__(self, url: str, headers: Optional[dict] = None):
+    def __init__(self, url: str, headers: Optional[dict] = None, validate_certs: bool = True):
         """Initialize the StreamableHTTP transport.
 
         Args:
             url: The MCP server URL endpoint
             headers: Optional headers to include with requests
-            session_id: Optional session ID to include with requests
+            validate_certs: Whether to validate SSL certificates (default: True)
         """
         self.url = url
-        self.headers = headers or {}
-        self.session_id = None
+        self._headers: Dict[str, str] = headers.copy() if headers else {}
+        self.validate_certs = validate_certs
+        self._session_id = None
 
     def connect(self) -> None:
         """Connect to the MCP server.
@@ -248,7 +249,7 @@ class StreamableHTTP(Transport):
                 method="POST",
                 data=json.dumps(data),
                 headers=headers,
-                validate_certs=False,
+                validate_certs=self.validate_certs,
             )
 
             self._extract_session_id(response)
@@ -276,7 +277,7 @@ class StreamableHTTP(Transport):
                 method="POST",
                 data=json.dumps(data),
                 headers=headers,
-                validate_certs=False,
+                validate_certs=self.validate_certs,
             )
 
             self._extract_session_id(response)
@@ -315,11 +316,11 @@ class StreamableHTTP(Transport):
         }
 
         # Add custom headers
-        headers.update(self.headers)
+        headers.update(self._headers)
 
         # Add session ID if available
-        if self.session_id:
-            headers["Mcp-Session-Id"] = self.session_id
+        if self._session_id:
+            headers["Mcp-Session-Id"] = self._session_id
 
         return headers
 
@@ -332,4 +333,4 @@ class StreamableHTTP(Transport):
         # Check for Mcp-Session-Id header in response
         session_header = response.headers.get("Mcp-Session-Id")
         if session_header is not None:
-            self.session_id = session_header
+            self._session_id = session_header

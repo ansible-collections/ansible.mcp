@@ -26,7 +26,7 @@ def streamable_http():
         "Accept": "application/json, text/event-stream",
         "MCP-Protocol-Version": "2025-06-18",
     }
-    return StreamableHTTP(url, headers)
+    return StreamableHTTP(url, headers, validate_certs=False)
 
 
 @pytest.fixture
@@ -52,11 +52,11 @@ def mock_response():
 )
 def test_init(url, headers, expected_headers):
     """Test StreamableHTTP initialization with various header configurations."""
-    client = StreamableHTTP(url, headers)
+    client = StreamableHTTP(url, headers, validate_certs=False)
 
     assert client.url == url
-    assert client.headers == expected_headers
-    assert client.session_id is None
+    assert client._headers == expected_headers
+    assert client._session_id is None
 
 
 @patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
@@ -89,7 +89,7 @@ def test_notify_with_session_id(mock_open_url, streamable_http, mock_response):
     streamable_http.notify(data)
 
     # Verify session ID was extracted
-    assert streamable_http.session_id == "session123"
+    assert streamable_http._session_id == "session123"
 
 
 @patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
@@ -169,7 +169,7 @@ def test_request_with_session_id(mock_open_url, streamable_http, mock_response):
     result = streamable_http.request(data)
 
     assert result == expected_response
-    assert streamable_http.session_id == "session456"
+    assert streamable_http._session_id == "session456"
 
 
 @patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
@@ -213,7 +213,7 @@ def test_build_headers_with_custom_headers():
 
 def test_build_headers_with_session_id():
     client = StreamableHTTP("http://localhost:8080")
-    client.session_id = "session789"
+    client._session_id = "session789"
 
     headers = client._build_headers()
 
@@ -252,7 +252,7 @@ def test_extract_session_id(streamable_http, headers, expected_session_id):
 
     streamable_http._extract_session_id(response)
 
-    assert streamable_http.session_id == expected_session_id
+    assert streamable_http._session_id == expected_session_id
 
 
 @patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
@@ -276,14 +276,14 @@ def test_session_id_persists_across_requests(mock_open_url, streamable_http):
     result1 = streamable_http.request(data1)
 
     assert result1 == {"result": "success"}
-    assert streamable_http.session_id == "session123"
+    assert streamable_http._session_id == "session123"
 
     # Second request
     data2 = {"jsonrpc": "2.0", "method": "test2", "id": 2}
     result2 = streamable_http.request(data2)
 
     assert result2 == {"result": "success2"}
-    assert streamable_http.session_id == "session123"
+    assert streamable_http._session_id == "session123"
 
     # Verify second request included session ID
     second_call_args = mock_open_url.call_args_list[1]
@@ -311,10 +311,10 @@ def test_session_id_updates_on_new_session(mock_open_url, streamable_http):
     data1 = {"jsonrpc": "2.0", "method": "test1", "id": 1}
     streamable_http.request(data1)
 
-    assert streamable_http.session_id == "session123"
+    assert streamable_http._session_id == "session123"
 
     # Second request
     data2 = {"jsonrpc": "2.0", "method": "test2", "id": 2}
     streamable_http.request(data2)
 
-    assert streamable_http.session_id == "session456"
+    assert streamable_http._session_id == "session456"
