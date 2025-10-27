@@ -1,6 +1,6 @@
 import json
 import os
-import signal
+import select
 import subprocess
 import time
 
@@ -81,7 +81,7 @@ class Stdio(Transport):
             # Prepare environment for command
             env: dict[str, Any] = os.environ.copy()
             env.update(self._env)
-            params.update({"env": self._env})
+            params.update({"env": env})
 
         try:
             cmd = self._cmd
@@ -94,7 +94,11 @@ class Stdio(Transport):
 
             # Check if process started successfully
             if self._process.poll() is not None:
-                stdout, stderr = self._process.communicate()
+                try:
+                    stdout, stderr = self._process.communicate(timeout=3)
+                except subprocess.TimeoutExpired:
+                    stdout, stderr = "", ""
+                    pass
                 raise AnsibleConnectionFailure(
                     f"MCP server exited immediately. stdout: {stdout}, stderr: {stderr}"
                 )
@@ -108,29 +112,22 @@ class Stdio(Transport):
 
         Args:
             wait_timeout: The wait timeout value, default: 5.
-            env: Environment variables to set for the MCP server process.
         Returns:
         """
 
-        def _handler(signum, frame):
-            raise AnsibleConnectionFailure(
-                f"MCP server response timeout after {wait_timeout} seconds."
-            )
-
         response = {}
-        if self._process is not None:
-            # Set up timeout
-            old_handler = signal.signal(signal.SIGALRM, _handler)
-            signal.alarm(wait_timeout)
+        if self._process:
+            rfd, wfd, efd = select.select([self._process.stdout], [], [], wait_timeout)
+            if not (rfd or wfd or efd):
+                # Process has timeout
+                raise AnsibleConnectionFailure(
+                    f"MCP server response timeout after {wait_timeout} seconds."
+                )
 
-            data = self._process.stdout.readline()
-            if not data:
-                raise AnsibleConnectionFailure("No response from MCP server")
-
-            # reset timeout handler
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
-            response = json.loads(data.strip())
+            if self._process.stdout in rfd:
+                response = json.loads(
+                    os.read(self._process.stdout.fileno(), 4096).decode("utf-8").strip()
+                )
         return response
 
     def _stdin_write(self, data: dict) -> None:
@@ -208,6 +205,6 @@ class Stdio(Transport):
                 self._process.kill()
                 self._process.wait()
             except Exception as e:
-                self._process = None
                 raise AnsibleConnectionFailure(f"Error closing MCP process: {str(e)}")
-            self._process = None
+            finally:
+                self._process = None

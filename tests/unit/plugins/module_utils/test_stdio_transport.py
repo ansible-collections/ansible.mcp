@@ -10,6 +10,7 @@ __metaclass__ = type
 
 
 import json
+import pathlib
 import random
 import string
 
@@ -27,16 +28,6 @@ from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import Stdio
 def mock_process():
     """Fixture providing a mock process."""
     process = MagicMock()
-    process.terminate = MagicMock()
-    process.wait = MagicMock()
-    process.kill = MagicMock()
-    process.stdin = MagicMock()
-    process.stdin.write = MagicMock()
-    process.stdin.flush = MagicMock()
-    process.stdout = MagicMock()
-    process.stdout.readline = MagicMock()
-    process.poll = MagicMock()
-    process.communicate = MagicMock()
     process.communicate.return_value = ("stdout value", "error output")
     return process
 
@@ -154,39 +145,42 @@ def test_stdin_write(mock_process):
     mock_process.stdin.flush.assert_called_once()
 
 
-@patch("signal.signal")
-@patch("signal.alarm")
-def test_stdout_read_no_data(mock_signal_alarm, mock_signal_signal, mock_process):
+@patch("select.select")
+def test_stdout_read_no_data(mock_select, mock_process):
 
     cmd = MagicMock()
     stdio = Stdio(cmd=cmd)
     stdio._process = mock_process
+    mock_select.return_value = [], [], []
 
-    mock_process.stdout.readline.return_value = None
     with pytest.raises(AnsibleConnectionFailure) as exc_info:
         stdio._stdout_read()
-    assert str(exc_info.value) == "No response from MCP server"
+    assert str(exc_info.value) == "MCP server response timeout after 5 seconds."
 
 
 @pytest.mark.parametrize(
     "stdout_line,data",
     [
-        ('{"hello": "world"}', dict(hello="world")),
-        ('{"foo": "bar"}\n', dict(foo="bar")),
+        (b'{"hello": "world"}', dict(hello="world")),
+        (b'{"foo": "bar"}\n', dict(foo="bar")),
     ],
 )
-@patch("signal.signal")
-@patch("signal.alarm")
-def test_stdout_read_with_data(
-    mock_signal_alarm, mock_signal_signal, mock_process, stdout_line, data
-):
+@patch("os.read")
+@patch("select.select")
+def test_stdout_read_with_data(mock_select, mock_os_read, mock_process, stdout_line, data):
 
     cmd = MagicMock()
     stdio = Stdio(cmd=cmd)
     stdio._process = mock_process
+    mock_stdout = MagicMock()
+    mock_stdout_fileno = MagicMock()
+    mock_stdout.fileno.return_value = mock_stdout_fileno
+    mock_process.stdout = mock_stdout
+    mock_select.return_value = [mock_stdout], [], []
+    mock_os_read.return_value = stdout_line
 
-    mock_process.stdout.readline.return_value = stdout_line
     assert data == stdio._stdout_read()
+    mock_os_read.assert_called_once_with(mock_stdout_fileno, 4096)
 
 
 @pytest.mark.parametrize("is_request", [True, False])
@@ -276,49 +270,11 @@ def test_request_or_notify_success(mock_process, is_request):
     stdio._stdin_write.assert_called_once_with(data)
 
 
-def test_with_mcp_server(tmp_path):
+def test_with_mcp_server():
 
-    mcp_server = """
-import sys
-import json
-import datetime
-import time
-import os
+    mcp_server_command = pathlib.Path(__file__).parent.joinpath("mcp_server.py")
 
-notifications = 0
-
-for line in sys.stdin:
-    data = json.loads(line)
-    method = data.get("method")
-    response = {}
-    if method == "notify":
-        notifications += 1
-    elif method == "read_notifications":
-        result = json.dumps(dict(notifications=notifications)) + "\\n"
-        sys.stdout.write(result)
-        sys.stdout.flush()
-    elif method == "hello":
-        name = data.get("name")
-        server_name = os.environ.get("MCP_SERVER_NAME")
-        result = json.dumps(dict(message=f"Hello {name} from {server_name}.")) + "\\n"
-        sys.stdout.write(result)
-        sys.stdout.flush()
-    elif method == "date":
-        today = datetime.datetime.now().strftime("%d%m%Y")
-        result = json.dumps(dict(date=f"The date of today is {today}")) + "\\n"
-        sys.stdout.write(result)
-        sys.stdout.flush()
-    elif method == "timeout":
-        value = data.get("value")
-        time.sleep(int(value))
-    """
-
-    d = tmp_path / "server"
-    d.mkdir()
-    p = d / "mcp_server.py"
-    p.write_text(mcp_server)
-
-    cmd = ["python", str(p.resolve())]
+    cmd = [str(mcp_server_command.resolve())]
     mcp_server_name = "mcp-server-" + "".join(
         [random.choice(string.ascii_lowercase + string.digits) for i in range(8)]
     )
@@ -344,7 +300,8 @@ for line in sys.stdin:
 
     # request timeout
     with pytest.raises(AnsibleConnectionFailure) as exc_info:
-        stdio.request(dict(method="timeout", value=6))
+        response = stdio.request(dict(method="timeout", value=6))
+        print(f"Response => {response}")
     assert "MCP server response timeout after" in str(exc_info.value)
 
     # terminate mcp server
