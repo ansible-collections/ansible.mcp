@@ -71,7 +71,7 @@ def test_client_initialization():
     client = MCPClient(transport)
 
     assert client.transport == transport
-    assert client.connected is False
+    assert client._connected is False
     assert client._server_info is None
 
 
@@ -82,7 +82,7 @@ def test_client_initialize():
 
     client.initialize()
 
-    assert client.connected is True
+    assert client._connected is True
     assert transport.connected is True
     assert client._server_info is not None
     assert len(transport.requests) == 1
@@ -212,6 +212,33 @@ def test_request_id_increments():
     assert id3 == 3
 
 
+def test_build_request_without_params():
+    """Test building a request without parameters."""
+    transport = MockTransport()
+    client = MCPClient(transport)
+
+    request = client._build_request("test/method")
+
+    assert request["jsonrpc"] == "2.0"
+    assert request["method"] == "test/method"
+    assert request["id"] == 1
+    assert "params" not in request
+
+
+def test_build_request_with_params():
+    """Test building a request with parameters."""
+    transport = MockTransport()
+    client = MCPClient(transport)
+
+    params = {"key": "value", "number": 42}
+    request = client._build_request("test/method", params)
+
+    assert request["jsonrpc"] == "2.0"
+    assert request["method"] == "test/method"
+    assert request["id"] == 1
+    assert request["params"] == params
+
+
 def test_tools_cache():
     """Test that tools list is cached."""
     transport = MockTransport()
@@ -228,7 +255,3 @@ def test_tools_cache():
     # Should not make another request
     assert len(transport.requests) == request_count
     assert tools1 is tools2
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
