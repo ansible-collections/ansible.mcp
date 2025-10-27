@@ -343,7 +343,6 @@ class MCPClient:
 
     Attributes:
         transport: The transport layer for communication with the server
-        connected: Whether the client is currently connected
     """
 
     def __init__(self, transport: Transport) -> None:
@@ -353,7 +352,7 @@ class MCPClient:
             transport: Transport implementation for server communication
         """
         self.transport = transport
-        self.connected = False
+        self._connected = False
         self._server_info: Optional[Dict[str, Any]] = None
         self._tools_cache: Optional[Dict[str, Any]] = None
         self._request_id = 0
@@ -367,22 +366,39 @@ class MCPClient:
         self._request_id += 1
         return self._request_id
 
+    def _build_request(self, method: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Compose a JSON-RPC 2.0 request for MCP.
+
+        Args:
+            method: The JSON-RPC method name
+            params: Optional parameters for the request
+
+        Returns:
+            Dictionary containing the JSON-RPC request
+        """
+        request = {
+            "jsonrpc": "2.0",
+            "id": self._get_next_id(),
+            "method": method,
+        }
+        if params is not None:
+            request["params"] = params
+        return request
+
     def initialize(self) -> None:
         """Initialize the connection to the MCP server.
 
         Raises:
             Exception: If initialization fails
         """
-        if not self.connected:
+        if not self._connected:
             self.transport.connect()
-            self.connected = True
+            self._connected = True
 
         # Send initialize request
-        init_request = {
-            "jsonrpc": "2.0",
-            "id": self._get_next_id(),
-            "method": "initialize",
-            "params": {
+        init_request = self._build_request(
+            "initialize",
+            {
                 "protocolVersion": "2025-03-26",
                 "capabilities": {
                     "roots": {"listChanged": True},
@@ -393,7 +409,7 @@ class MCPClient:
                     "version": "1.0.0",
                 },
             },
-        }
+        )
 
         response = self.transport.request(init_request)
 
@@ -426,11 +442,7 @@ class MCPClient:
             return self._tools_cache
 
         # Make request to server
-        request = {
-            "jsonrpc": "2.0",
-            "id": self._get_next_id(),
-            "method": "tools/list",
-        }
+        request = self._build_request("tools/list")
 
         response = self.transport.request(request)
 
@@ -476,15 +488,13 @@ class MCPClient:
         Raises:
             Exception: If the tool call fails
         """
-        request = {
-            "jsonrpc": "2.0",
-            "id": self._get_next_id(),
-            "method": "tools/call",
-            "params": {
+        request = self._build_request(
+            "tools/call",
+            {
                 "name": tool,
                 "arguments": kwargs,
             },
-        }
+        )
 
         response = self.transport.request(request)
 
@@ -577,3 +587,6 @@ class MCPClient:
     def close(self) -> None:
         """Close the connection to the MCP server."""
         self.transport.close()
+        self._connected = False
+        self._server_info = None
+        self._tools_cache = None
