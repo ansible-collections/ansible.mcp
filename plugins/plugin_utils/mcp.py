@@ -252,10 +252,10 @@ class StreamableHTTP(Transport):
                 validate_certs=self.validate_certs,
             )
 
-            self._extract_session_id(response)
-
             if response.getcode() != 202:
                 raise Exception(f"Unexpected response code: {response.getcode()}")
+
+            self._extract_session_id(response)
 
         except Exception as e:
             raise Exception(f"Failed to send notification: {str(e)}")
@@ -280,12 +280,12 @@ class StreamableHTTP(Transport):
                 validate_certs=self.validate_certs,
             )
 
+            if response.getcode() != 200:
+                raise Exception(f"Unexpected response code: {response.getcode()}")
+
             self._extract_session_id(response)
 
             response_data = response.read()
-
-            if response.getcode() != 200:
-                raise Exception(f"Unexpected response code: {response.getcode()}")
 
             # Parse JSON response
             try:
