@@ -17,6 +17,15 @@ from ansible.errors import AnsibleConnectionFailure
 from ansible.module_utils.urls import open_url
 
 
+class MCPError(Exception):
+    """Base exception class for MCP related errors.
+
+    This exception is raised when MCP operations fail, such as initialization,
+    tool listing, tool execution, or validation errors.
+    """
+    pass
+
+
 class Transport(ABC):
     @abstractmethod
     def connect(self) -> None:
@@ -389,7 +398,7 @@ class MCPClient:
         """Initialize the connection to the MCP server.
 
         Raises:
-            Exception: If initialization fails
+            MCPError: If initialization fails
         """
         if not self._connected:
             self.transport.connect()
@@ -417,7 +426,7 @@ class MCPClient:
         if "result" in response:
             self._server_info = response["result"]
         else:
-            raise Exception(
+            raise MCPError(
                 f"Initialization failed: {response.get('error', 'Error in initialization')}"
             )
 
@@ -435,8 +444,11 @@ class MCPClient:
             Dictionary containing the tools list response
 
         Raises:
-            Exception: If the request fails
+            MCPError: If the request fails
         """
+        if not self._connected or self._server_info is None:
+            raise MCPError("Client not initialized. Call initialize() first.")
+
         # Return cached result if available
         if self._tools_cache is not None:
             return self._tools_cache
@@ -450,7 +462,7 @@ class MCPClient:
             self._tools_cache = response["result"]
             return self._tools_cache
         else:
-            raise Exception(
+            raise MCPError(
                 f"Failed to list tools: {response.get('error', 'Error in listing tools')}"
             )
 
@@ -464,8 +476,12 @@ class MCPClient:
             Dictionary containing the tool definition
 
         Raises:
+            MCPError: If client is not initialized
             ValueError: If the tool is not found
         """
+        if not self._connected or self._server_info is None:
+            raise MCPError("Client not initialized. Call initialize() first.")
+
         tools_response = self.list_tools()
         tools = tools_response.get("tools", [])
 
@@ -486,8 +502,15 @@ class MCPClient:
             Dictionary containing the tool call response
 
         Raises:
-            Exception: If the tool call fails
+            ValueError: If validation fails
+            MCPError: If the tool call fails
         """
+        if not self._connected or self._server_info is None:
+            raise MCPError("Client not initialized. Call initialize() first.")
+
+        # Validate parameters before making the request
+        self.validate(tool, **kwargs)
+
         request = self._build_request(
             "tools/call",
             {
@@ -501,10 +524,11 @@ class MCPClient:
         if "result" in response:
             return response["result"]
         else:
-            raise Exception(
+            raise MCPError(
                 f"Failed to call tool '{tool}': {response.get('error', 'Error in tool call')}"
             )
 
+    @property
     def server_info(self) -> Dict[str, Any]:
         """Return cached server information from initialization.
 
@@ -512,10 +536,10 @@ class MCPClient:
             Dictionary containing server information
 
         Raises:
-            RuntimeError: If initialize() has not been called yet
+            MCPError: If initialize() has not been called yet
         """
         if self._server_info is None:
-            raise RuntimeError("Client not initialized. Call initialize() first.")
+            raise MCPError("Client not initialized. Call initialize() first.")
         return self._server_info
 
     def validate(self, tool: str, **kwargs: Any) -> None:
@@ -568,6 +592,15 @@ class MCPClient:
                 parameter_type_in_schema = parameter_schema.get("type")
 
                 if parameter_type_in_schema:
+                    # Handle None values first
+                    if parameter_value is None:
+                        if parameter_type_in_schema != "null":
+                            raise ValueError(
+                                f"Parameter '{parameter_name}' for tool '{tool}' cannot be None (expected type '{parameter_type_in_schema}')"
+                            )
+                        # None is valid for null type, continue to next parameter
+                        continue
+
                     # Map JSON Schema types to their corresponding Python types
                     schema_type_to_python_type = {
                         "string": str,
@@ -576,9 +609,15 @@ class MCPClient:
                         "boolean": bool,
                         "array": list,
                         "object": dict,
+                        "null": type(None),
                     }
 
                     expected_type = schema_type_to_python_type.get(parameter_type_in_schema)
+                    if expected_type is None:
+                        raise ValueError(
+                            f"Tool '{tool}' has unsupported parameter type '{parameter_type_in_schema}' for parameter '{parameter_name}'"
+                        )
+
                     if not isinstance(parameter_value, expected_type):
                         raise ValueError(
                             f"Parameter '{parameter_name}' for tool '{tool}' should be of type '{parameter_type_in_schema}', but got '{type(parameter_value).__name__}'"
