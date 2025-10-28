@@ -621,7 +621,7 @@ class MCPClient:
                             f"Tool '{tool}' has unsupported parameter type '{parameter_type_in_schema}' for parameter '{parameter_name}'"
                         )
 
-                    if not isinstance(parameter_value, expected_type):
+                    if not isinstance(parameter_value, expected_type):  # type: ignore[arg-type]
                         raise ValueError(
                             (
                                 f"Parameter '{parameter_name}' for tool '{tool}' should be of type "
