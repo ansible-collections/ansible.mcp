@@ -23,6 +23,7 @@ class MCPError(Exception):
     This exception is raised when MCP operations fail, such as initialization,
     tool listing, tool execution, or validation errors.
     """
+
     pass
 
 
@@ -375,7 +376,9 @@ class MCPClient:
         self._request_id += 1
         return self._request_id
 
-    def _build_request(self, method: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _build_request(
+        self, method: str, params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Compose a JSON-RPC 2.0 request for MCP.
 
         Args:
@@ -620,7 +623,10 @@ class MCPClient:
 
                     if not isinstance(parameter_value, expected_type):
                         raise ValueError(
-                            f"Parameter '{parameter_name}' for tool '{tool}' should be of type '{parameter_type_in_schema}', but got '{type(parameter_value).__name__}'"
+                            (
+                                f"Parameter '{parameter_name}' for tool '{tool}' should be of type "
+                                f"'{parameter_type_in_schema}', but got '{type(parameter_value).__name__}'"
+                            )
                         )
 
     def close(self) -> None:
