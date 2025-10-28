@@ -5,7 +5,7 @@
 
 import pytest
 
-from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import MCPClient, Transport
+from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import MCPClient, MCPError, Transport
 
 
 class MockTransport(Transport):
@@ -172,7 +172,7 @@ def test_server_info():
     client = MCPClient(transport)
     client.initialize()
 
-    info = client.server_info()
+    info = client.server_info
 
     assert "serverInfo" in info
     assert info["serverInfo"]["name"] == "test-server"
@@ -183,8 +183,8 @@ def test_server_info_not_initialized():
     transport = MockTransport()
     client = MCPClient(transport)
 
-    with pytest.raises(RuntimeError, match="not initialized"):
-        client.server_info()
+    with pytest.raises(MCPError, match="not initialized"):
+        client.server_info
 
 
 def test_close():
