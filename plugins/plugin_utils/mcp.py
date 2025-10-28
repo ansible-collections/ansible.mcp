@@ -113,6 +113,7 @@ class Stdio(Transport):
         Args:
             wait_timeout: The wait timeout value, default: 5.
         Returns:
+            A JSON-RPC response dictionary from the MCP server.
         """
 
         response = {}
