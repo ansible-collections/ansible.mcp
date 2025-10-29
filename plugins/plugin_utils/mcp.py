@@ -397,6 +397,26 @@ class MCPClient:
             request["params"] = params
         return request
 
+    def _handle_response(self, response: Dict[str, Any], operation: str) -> Dict[str, Any]:
+        """Handle JSON-RPC response and extract result or raise appropriate error.
+
+        Args:
+            response: JSON-RPC response from server
+            operation: Description of the operation being performed (for error messages)
+
+        Returns:
+            The result from the response
+
+        Raises:
+            MCPError: If the response contains an error
+        """
+        if "result" in response:
+            return response["result"]
+        else:
+            raise MCPError(
+                f"Failed to {operation}: {response.get('error', f'Error in {operation}')}"
+            )
+
     def initialize(self) -> None:
         """Initialize the connection to the MCP server.
 
@@ -405,7 +425,6 @@ class MCPClient:
         """
         if not self._connected:
             self.transport.connect()
-            self._connected = True
 
         # Send initialize request
         init_request = self._build_request(
@@ -426,12 +445,7 @@ class MCPClient:
         response = self.transport.request(init_request)
 
         # Cache server info from response
-        if "result" in response:
-            self._server_info = response["result"]
-        else:
-            raise MCPError(
-                f"Initialization failed: {response.get('error', 'Error in initialization')}"
-            )
+        self._server_info = self._handle_response(response, "initialize")
 
         # Send initialized notification
         initialized_notification = {
@@ -439,6 +453,9 @@ class MCPClient:
             "method": "notifications/initialized",
         }
         self.transport.notify(initialized_notification)
+
+        # Mark as connected only after successful initialization
+        self._connected = True
 
     def list_tools(self) -> Dict[str, Any]:
         """List all available tools from the MCP server.
@@ -461,13 +478,8 @@ class MCPClient:
 
         response = self.transport.request(request)
 
-        if "result" in response:
-            self._tools_cache = response["result"]
-            return self._tools_cache
-        else:
-            raise MCPError(
-                f"Failed to list tools: {response.get('error', 'Error in listing tools')}"
-            )
+        self._tools_cache = self._handle_response(response, "list tools")
+        return self._tools_cache
 
     def get_tool(self, tool: str) -> Dict[str, Any]:
         """Get the definition of a specific tool.
@@ -479,8 +491,7 @@ class MCPClient:
             Dictionary containing the tool definition
 
         Raises:
-            MCPError: If client is not initialized
-            ValueError: If the tool is not found
+            MCPError: If client is not initialized or if the tool is not found
         """
         if not self._connected or self._server_info is None:
             raise MCPError("Client not initialized. Call initialize() first.")
@@ -492,7 +503,7 @@ class MCPClient:
             if tool_def.get("name") == tool:
                 return tool_def
 
-        raise ValueError(f"Tool '{tool}' not found")
+        raise MCPError(f"Tool '{tool}' not found")
 
     def call_tool(self, tool: str, **kwargs: Any) -> Dict[str, Any]:
         """Call a tool on the MCP server with the provided arguments.
@@ -524,12 +535,7 @@ class MCPClient:
 
         response = self.transport.request(request)
 
-        if "result" in response:
-            return response["result"]
-        else:
-            raise MCPError(
-                f"Failed to call tool '{tool}': {response.get('error', 'Error in tool call')}"
-            )
+        return self._handle_response(response, f"call tool '{tool}'")
 
     @property
     def server_info(self) -> Dict[str, Any]:
@@ -545,6 +551,110 @@ class MCPClient:
             raise MCPError("Client not initialized. Call initialize() first.")
         return self._server_info
 
+    def _validate_schema_type(self, tool: str, schema: Dict[str, Any]) -> None:
+        """Validate that the schema type is supported.
+
+        Args:
+            tool: Name of the tool being validated
+            schema: The input schema from the tool definition
+
+        Raises:
+            ValueError: If the schema type is not supported
+        """
+        schema_type = schema.get("type")
+        if schema_type and schema_type != "object":
+            raise ValueError(
+                f"Tool '{tool}' has unsupported schema type '{schema_type}', expected 'object'"
+            )
+
+    def _validate_required_parameters(
+        self, tool: str, kwargs: Dict[str, Any], required_parameters: list
+    ) -> None:
+        """Validate that all required parameters are provided.
+
+        Args:
+            tool: Name of the tool being validated
+            kwargs: Arguments provided to the tool
+            required_parameters: List of required parameter names
+
+        Raises:
+            ValueError: If required parameters are missing
+        """
+        missing_required = [param for param in required_parameters if param not in kwargs]
+        if missing_required:
+            raise ValueError(
+                f"Tool '{tool}' missing required parameters: {', '.join(missing_required)}"
+            )
+
+    def _validate_unknown_parameters(
+        self, tool: str, kwargs: Dict[str, Any], schema_properties: Dict[str, Any]
+    ) -> None:
+        """Validate that no unknown parameters are provided.
+
+        Args:
+            tool: Name of the tool being validated
+            kwargs: Arguments provided to the tool
+            schema_properties: Properties defined in the schema
+
+        Raises:
+            ValueError: If unknown parameters are provided
+        """
+        if schema_properties:
+            unknown_parameters = [param for param in kwargs if param not in schema_properties]
+            if unknown_parameters:
+                raise ValueError(
+                    f"Tool '{tool}' received unknown parameters: {', '.join(unknown_parameters)}"
+                )
+
+    def _validate_parameter_type(
+        self, tool: str, parameter_name: str, parameter_value: Any, parameter_schema: Dict[str, Any]
+    ) -> None:
+        """Validate that a parameter value matches its expected type.
+
+        Args:
+            tool: Name of the tool being validated
+            parameter_name: Name of the parameter being validated
+            parameter_value: Value of the parameter
+            parameter_schema: Schema definition for the parameter
+
+        Raises:
+            ValueError: If the parameter type is invalid
+        """
+        parameter_type_in_schema = parameter_schema.get("type")
+        if not parameter_type_in_schema:
+            return
+
+        # Handle None values first
+        if parameter_value is None:
+            if parameter_type_in_schema != "null":
+                raise ValueError(
+                    f"Parameter '{parameter_name}' for tool '{tool}' cannot be None (expected type '{parameter_type_in_schema}')"
+                )
+            return
+
+        # Map JSON Schema types to their corresponding Python types
+        schema_type_to_python_type = {
+            "string": str,
+            "number": (int, float),
+            "integer": int,
+            "boolean": bool,
+            "array": list,
+            "object": dict,
+            "null": type(None),
+        }
+
+        expected_type = schema_type_to_python_type.get(parameter_type_in_schema)
+        if expected_type is None:
+            raise ValueError(
+                f"Tool '{tool}' has unsupported parameter type '{parameter_type_in_schema}' for parameter '{parameter_name}'"
+            )
+
+        if not isinstance(parameter_value, expected_type):  # type: ignore[arg-type]
+            raise ValueError(
+                f"Parameter '{parameter_name}' for tool '{tool}' should be of type "
+                f"'{parameter_type_in_schema}', but got '{type(parameter_value).__name__}'"
+            )
+
     def validate(self, tool: str, **kwargs: Any) -> None:
         """Validate that a tool call arguments match the tool's schema.
 
@@ -553,7 +663,7 @@ class MCPClient:
             **kwargs: Arguments to validate against the tool schema
 
         Raises:
-            ValueError: If the tool is not found
+            MCPError: If the tool is not found
             ValueError: If validation fails (missing required parameters, etc.)
         """
         # Get tool definition and schema
@@ -561,73 +671,21 @@ class MCPClient:
         schema = tool_definition.get("inputSchema", {})
 
         # Extract schema components
-        schema_type = schema.get("type")
         parameters_from_schema_properties = schema.get("properties", {})
         required_parameters = schema.get("required", [])
 
-        # Validate schema supports object type
-        if schema_type and schema_type != "object":
-            raise ValueError(
-                f"Tool '{tool}' has unsupported schema type '{schema_type}', expected 'object'"
-            )
-
-        # Check for missing required parameters
-        missing_required = [param for param in required_parameters if param not in kwargs]
-        if missing_required:
-            raise ValueError(
-                f"Tool '{tool}' missing required parameters: {', '.join(missing_required)}"
-            )
-
-        # Check for unknown parameters
-        if parameters_from_schema_properties:
-            unknown_parameters = [
-                param for param in kwargs if param not in parameters_from_schema_properties
-            ]
-            if unknown_parameters:
-                raise ValueError(
-                    f"Tool '{tool}' received unknown parameters: {', '.join(unknown_parameters)}"
-                )
+        # Perform validation
+        self._validate_schema_type(tool, schema)
+        self._validate_required_parameters(tool, kwargs, required_parameters)
+        self._validate_unknown_parameters(tool, kwargs, parameters_from_schema_properties)
 
         # Validate parameter types
         for parameter_name, parameter_value in kwargs.items():
             if parameter_name in parameters_from_schema_properties:
                 parameter_schema = parameters_from_schema_properties[parameter_name]
-                parameter_type_in_schema = parameter_schema.get("type")
-
-                if parameter_type_in_schema:
-                    # Handle None values first
-                    if parameter_value is None:
-                        if parameter_type_in_schema != "null":
-                            raise ValueError(
-                                f"Parameter '{parameter_name}' for tool '{tool}' cannot be None (expected type '{parameter_type_in_schema}')"
-                            )
-                        # None is valid for null type, continue to next parameter
-                        continue
-
-                    # Map JSON Schema types to their corresponding Python types
-                    schema_type_to_python_type = {
-                        "string": str,
-                        "number": (int, float),
-                        "integer": int,
-                        "boolean": bool,
-                        "array": list,
-                        "object": dict,
-                        "null": type(None),
-                    }
-
-                    expected_type = schema_type_to_python_type.get(parameter_type_in_schema)
-                    if expected_type is None:
-                        raise ValueError(
-                            f"Tool '{tool}' has unsupported parameter type '{parameter_type_in_schema}' for parameter '{parameter_name}'"
-                        )
-
-                    if not isinstance(parameter_value, expected_type):  # type: ignore[arg-type]
-                        raise ValueError(
-                            (
-                                f"Parameter '{parameter_name}' for tool '{tool}' should be of type "
-                                f"'{parameter_type_in_schema}', but got '{type(parameter_value).__name__}'"
-                            )
-                        )
+                self._validate_parameter_type(
+                    tool, parameter_name, parameter_value, parameter_schema
+                )
 
     def close(self) -> None:
         """Close the connection to the MCP server."""
@@ -635,3 +693,4 @@ class MCPClient:
         self._connected = False
         self._server_info = None
         self._tools_cache = None
+        self._request_id = 0
