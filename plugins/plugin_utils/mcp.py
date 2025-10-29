@@ -6,11 +6,10 @@ import time
 
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Any, Callable, Dict,Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from ansible.errors import AnsibleConnectionFailure
 from ansible.module_utils.urls import open_url
-
 
 
 class Transport(ABC):
