@@ -115,12 +115,12 @@ def test_get_tool():
 
 
 def test_get_tool_not_found():
-    """Test getting non-existent tool raises ValueError."""
+    """Test getting non-existent tool raises MCPError."""
     transport = MockTransport()
     client = MCPClient(transport)
     client.initialize()
 
-    with pytest.raises(ValueError, match="not found"):
+    with pytest.raises(MCPError, match="not found"):
         client.get_tool("nonexistent")
 
 
