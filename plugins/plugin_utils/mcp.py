@@ -33,6 +33,7 @@ class MCPError(Exception):
     This exception is raised when MCP operations fail, such as initialization,
     tool listing, tool execution, or validation errors.
     """
+
     pass
 
 

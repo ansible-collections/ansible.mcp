@@ -58,11 +58,41 @@ options:
         default: true
         vars:
             - name: ansible_mcp_mcp_validate_certs
+    persistent_connect_timeout:
+        description:
+            - Timeout in seconds for initial connection to persistent transport.
+        type: int
+        default: 30
+        env:
+            - name: ANSIBLE_PERSISTENT_CONNECT_TIMEOUT
+        vars:
+            - name: ansible_connect_timeout
+    persistent_command_timeout:
+        description:
+            - Timeout for persistent connection commands in seconds.
+        type: int
+        default: 30
+        env:
+            - name: ANSIBLE_PERSISTENT_COMMAND_TIMEOUT
+        vars:
+            - name: ansible_command_timeout
+    persistent_log_messages:
+        description:
+            - Enable logging of messages from persistent connection.
+            - Be sure to fully understand the security implications of enabling this
+              option as it could create a security vulnerability by logging sensitive information in log file.
+        type: boolean
+        default: False
+        env:
+            - name: ANSIBLE_PERSISTENT_LOG_MESSAGES
+        vars:
+            - name: ansible_persistent_log_messages
 """
 
 
 import json
 import os
+import time
 
 from functools import wraps
 from typing import Any, Dict
@@ -116,7 +146,10 @@ class Connection(PersistentConnectionBase):
         super(Connection, self).__init__(play_context, new_stdin, *args, **kwargs)
         self._client: MCPClient | None = None
         self._connected = False
-        self._transport_type: str | None = None
+
+        # Persistent options
+        self._timeout = self.get_option("persistent_command_timeout")
+        self._log_messages_enabled = self.get_option("persistent_log_messages")
 
     @property
     def connected(self) -> bool:
@@ -140,10 +173,19 @@ class Connection(PersistentConnectionBase):
 
         # Initialize MCP client
         self._client = MCPClient(transport)
-        try:
-            self._client.initialize()
-        except Exception as e:
-            raise AnsibleConnectionFailure(f"[mcp] MCP client initialization failed: {e}")
+
+        timeout = self.get_option("persistent_connect_timeout")
+        start_time = time.time()
+        while True:
+            try:
+                self._client.initialize()
+                break
+            except Exception as e:
+                if time.time() - start_time > timeout:
+                    raise AnsibleConnectionFailure(
+                        f"MCP connection timed out after {timeout}s: {e}"
+                    )
+                time.sleep(1)
 
         self._connected = True
         display.vvv(f"[mcp] Connection to '{server_name}' successfully initialized")
