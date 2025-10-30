@@ -21,7 +21,7 @@ import pytest
 
 from ansible.errors import AnsibleConnectionFailure
 
-from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import Stdio
+from ansible_collections.ansible.mcp.plugins.plugin_utils.transport import Stdio
 
 
 @pytest.fixture
