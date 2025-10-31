@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import StreamableHTTP
+from ansible_collections.ansible.mcp.plugins.plugin_utils.transport import StreamableHTTP
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def test_init(url, headers, expected_headers):
     assert client._session_id is None
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_notify_success(mock_open_url, streamable_http, mock_response):
     mock_response.getcode.return_value = 202
     mock_open_url.return_value = mock_response
@@ -78,7 +78,7 @@ def test_notify_success(mock_open_url, streamable_http, mock_response):
     assert call_args[1]["validate_certs"] is False
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_notify_with_session_id(mock_open_url, streamable_http, mock_response):
     mock_response.getcode.return_value = 202
     mock_response.headers = {"Mcp-Session-Id": "session123"}
@@ -92,7 +92,7 @@ def test_notify_with_session_id(mock_open_url, streamable_http, mock_response):
     assert streamable_http._session_id == "session123"
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_notify_http_error(mock_open_url, streamable_http):
     mock_open_url.side_effect = Exception("Connection failed")
 
@@ -102,7 +102,7 @@ def test_notify_http_error(mock_open_url, streamable_http):
         streamable_http.notify(data)
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_request_success(mock_open_url, streamable_http, mock_response):
     expected_response = {"jsonrpc": "2.0", "result": "success", "id": 1}
     mock_response.read.return_value = json.dumps(expected_response).encode("utf-8")
@@ -129,7 +129,7 @@ def test_request_success(mock_open_url, streamable_http, mock_response):
         (500, "request"),
     ],
 )
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_wrong_status_codes(
     mock_open_url, streamable_http, mock_response, status_code, method_name
 ):
@@ -146,7 +146,7 @@ def test_wrong_status_codes(
             streamable_http.request(data)
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_request_invalid_json(mock_open_url, streamable_http, mock_response):
     mock_response.read.return_value = b"invalid json"
     mock_open_url.return_value = mock_response
@@ -157,7 +157,7 @@ def test_request_invalid_json(mock_open_url, streamable_http, mock_response):
         streamable_http.request(data)
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_request_with_session_id(mock_open_url, streamable_http, mock_response):
     expected_response = {"jsonrpc": "2.0", "result": "success", "id": 1}
     mock_response.read.return_value = json.dumps(expected_response).encode("utf-8")
@@ -172,7 +172,7 @@ def test_request_with_session_id(mock_open_url, streamable_http, mock_response):
     assert streamable_http._session_id == "session456"
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_request_http_error(mock_open_url, streamable_http):
     mock_open_url.side_effect = Exception("Network error")
 
@@ -255,7 +255,7 @@ def test_extract_session_id(streamable_http, headers, expected_session_id):
     assert streamable_http._session_id == expected_session_id
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_session_id_persists_across_requests(mock_open_url, streamable_http):
     # First request - no session ID
     response1 = Mock()
@@ -291,7 +291,7 @@ def test_session_id_persists_across_requests(mock_open_url, streamable_http):
     assert headers["Mcp-Session-Id"] == "session123"
 
 
-@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.mcp.open_url")
+@patch("ansible_collections.ansible.mcp.plugins.plugin_utils.transport.open_url")
 def test_session_id_updates_on_new_session(mock_open_url, streamable_http):
     # First request
     response1 = Mock()

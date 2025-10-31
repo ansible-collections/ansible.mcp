@@ -5,7 +5,8 @@
 
 import pytest
 
-from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import MCPClient, MCPError, Transport
+from ansible_collections.ansible.mcp.plugins.plugin_utils.client import MCPClient, MCPError
+from ansible_collections.ansible.mcp.plugins.plugin_utils.transport import Transport
 
 
 class MockTransport(Transport):
