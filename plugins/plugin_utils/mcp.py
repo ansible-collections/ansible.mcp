@@ -27,16 +27,6 @@ class MCPError(Exception):
     pass
 
 
-class MCPError(Exception):
-    """Base exception class for MCP related errors.
-
-    This exception is raised when MCP operations fail, such as initialization,
-    tool listing, tool execution, or validation errors.
-    """
-
-    pass
-
-
 class Transport(ABC):
     @abstractmethod
     def connect(self) -> None:

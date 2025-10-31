@@ -66,6 +66,9 @@ def fixture_loaded_mcp_connection(manifest_file):
         "mcp_bearer_token": "token123",
         "mcp_validate_certs": True,
         "mcp_manifest_path": str(manifest_file),
+        "persistent_connect_timeout": 15,
+        "persistent_command_timeout": 15,
+        "persistent_log_messages": False,
     }
     conn.get_option = get_option
 

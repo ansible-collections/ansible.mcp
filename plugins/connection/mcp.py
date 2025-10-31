@@ -4,6 +4,7 @@
 
 
 DOCUMENTATION = r"""
+---
 name: mcp
 author:
     - Alina Buzachis (@alinabuzachis)
@@ -144,12 +145,8 @@ class Connection(PersistentConnectionBase):
 
     def __init__(self, play_context, new_stdin, *args, **kwargs):
         super(Connection, self).__init__(play_context, new_stdin, *args, **kwargs)
-        self._client: MCPClient | None = None
+        self._client = None
         self._connected = False
-
-        # Persistent options
-        self._timeout = self.get_option("persistent_command_timeout")
-        self._log_messages_enabled = self.get_option("persistent_log_messages")
 
     @property
     def connected(self) -> bool:
