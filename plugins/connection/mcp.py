@@ -221,6 +221,7 @@ class Connection(PersistentConnectionBase):
 
         elif transport_type == "http":
             url = server_info.get("url")
+
             if not url:
                 raise AnsibleConnectionFailure(
                     f"[mcp] Manifest for '{server_name}' missing 'url' for http transport"
@@ -279,4 +280,4 @@ class Connection(PersistentConnectionBase):
     @ensure_connected
     def server_info(self) -> Dict[str, Any]:
         """Returns the cached server information from the initialization step."""
-        return self._client.server_info()
+        return self._client.server_info
