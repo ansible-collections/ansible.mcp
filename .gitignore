@@ -4,6 +4,7 @@ tests/integration/inventory
 __pycache__/
 *.py[cod]
 *$py.class
+tests/integration/integration_config.yml
 
 # C extensions
 *.so

@@ -1,9 +1,14 @@
 ---
-- name: Display the variable
-  ansible.builtin.debug:
-    var: vars
+- name: Set integration test directory path
+  ansible.builtin.set_fact:
+    integration_path: "{{ role_path | dirname | dirname }}"
 
-- name: Ensure the Github PAT is defined
-  ansible.builtin.fail:
-    msg: "Github PAT must be defined using github_mcp_pat variable"
-  when: github_mcp_pat is undefined
+- name: List file from target
+  ansible.builtin.shell:
+    cmd: "find {{ integration_path }} -name '*.*'"
+  register: _files
+
+
+- name: Selected files
+  ansible.builtin.debug:
+    var: _files.stdout_lines
