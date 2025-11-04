@@ -1,14 +1,10 @@
 ---
-- name: Set integration test directory path
-  ansible.builtin.set_fact:
-    integration_path: "{{ role_path | dirname | dirname }}"
+- name: check temporary file
+  ansible.builtin.stat:
+    path: /tmp/integration_config.yml
+  register: st
 
-- name: List file from target
-  ansible.builtin.shell:
-    cmd: "find {{ integration_path }} -name '*.*'"
-  register: _files
-
-
-- name: Selected files
-  ansible.builtin.debug:
-    var: _files.stdout_lines
+- name: Validate that the file exists
+  ansible.builtin.fail:
+    msg: "The file /tmp/integration_config.yml does not exist."
+  when: not st.stat.exists
