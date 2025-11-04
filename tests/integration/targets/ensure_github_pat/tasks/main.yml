@@ -1,5 +1,6 @@
 ---
-- ansible.builtin.debug:
+- name: Display the variable
+  ansible.builtin.debug:
     var: vars
 
 - name: Ensure the Github PAT is defined
