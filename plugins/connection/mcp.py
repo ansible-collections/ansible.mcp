@@ -16,51 +16,51 @@ description:
     - Both stdio and Streamable HTTP transport methods are supported.
     - All tasks using this connection plugin are run on the Ansible control node.
 options:
-    mcp_server_name:
+    server_name:
         description:
             - The name of the MCP server.
         type: str
         required: true
         vars:
-            - name: ansible_mcp_mcp_server_name
-    mcp_server_args:
+            - name: ansible_mcp_server_name
+    server_args:
         description:
             - Additional command line arguments to pass to the server when using stdio transport.
         type: list
         elements: str
         vars:
-            - name: ansible_mcp_mcp_server_args
+            - name: ansible_mcp_server_args
         env:
             - name: MCP_BEARER_TOKEN
-    mcp_server_env:
+    server_env:
         description:
             - Additional environment variables to pass to the server when using stdio transport.
             - These are merged with the current environment.
             - Ignored when using http transport.
         type: dict
         vars:
-            - name: ansible_mcp_mcp_server_env
-    mcp_bearer_token:
+            - name: ansible_mcp_server_env
+    bearer_token:
         description:
             - Bearer token for authenticating to the MCP server when using http transport.
             - Ignored when using stdio transport.
         type: str
         vars:
-            - name: ansible_mcp_mcp_bearer_token
-    mcp_manifest_path:
+            - name: ansible_mcp_bearer_token
+    manifest_path:
         description:
             - Path to MCP manifest JSON file to resolve server executable paths for stdio.
         type: str
         default: "/opt/mcp/mcpservers.json"
         vars:
-            - name: ansible_mcp_mcp_manifest_path
-    mcp_validate_certs:
+            - name: ansible_mcp_manifest_path
+    validate_certs:
         description:
             - Whether to validate SSL certificates when using http transport.
         type: bool
         default: true
         vars:
-            - name: ansible_mcp_mcp_validate_certs
+            - name: ansible_mcp_validate_certs
     persistent_connect_timeout:
         description:
             - Timeout in seconds for initial connection to persistent transport.
@@ -106,8 +106,8 @@ from ansible_collections.ansible.utils.plugins.plugin_utils.connection_base impo
     PersistentConnectionBase,
 )
 
-from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import (
-    MCPClient,
+from ansible_collections.ansible.mcp.plugins.plugin_utils.client import MCPClient
+from ansible_collections.ansible.mcp.plugins.plugin_utils.transport import (
     Stdio,
     StreamableHTTP,
     Transport,
@@ -165,8 +165,8 @@ class Connection(PersistentConnectionBase):
             display.vvv("[mcp] Already connected, skipping _connect()")
             return
 
-        server_name = self.get_option("mcp_server_name")
-        manifest_path = self.get_option("mcp_manifest_path") or "/opt/mcp/mcpservers.json"
+        server_name = self.get_option("server_name")
+        manifest_path = self.get_option("manifest_path") or "/opt/mcp/mcpservers.json"
 
         server_info = self._load_server_from_manifest(server_name, manifest_path)
         transport = self._create_transport(server_name, server_info)
@@ -216,9 +216,9 @@ class Connection(PersistentConnectionBase):
                     f"[mcp] Manifest for '{server_name}' missing 'command' for stdio transport"
                 )
             manifest_args = server_info.get("args", [])
-            plugin_args = self.get_option("mcp_server_args") or []
+            plugin_args = self.get_option("server_args") or []
             cmd = [server_info["command"]] + manifest_args + plugin_args
-            env = self.get_option("mcp_server_env") or {}
+            env = self.get_option("server_env") or {}
             display.vvv(f"[mcp] Starting stdio MCP server '{server_name}': {' '.join(cmd)}")
             return Stdio(cmd=cmd, env=env)
 
@@ -231,12 +231,12 @@ class Connection(PersistentConnectionBase):
                 )
 
             headers = {}
-            token = self.get_option("mcp_bearer_token")
+            token = self.get_option("bearer_token")
             if token:
                 headers["Authorization"] = f"Bearer {token}"
             display.vvv(f"[mcp] Connecting to HTTP MCP server '{server_name}': {url}")
             return StreamableHTTP(
-                url=url, headers=headers, validate_certs=self.get_option("mcp_validate_certs")
+                url=url, headers=headers, validate_certs=self.get_option("validate_certs")
             )
 
         else:

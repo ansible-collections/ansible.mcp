@@ -78,12 +78,12 @@ def fixture_loaded_mcp_connection(manifest_file):
 
     # Provide a get_option helper
     conn.test_options = {
-        "mcp_server_name": "remote",
-        "mcp_server_args": ["--mock"],
-        "mcp_server_env": {"FOO": "BAR"},
-        "mcp_bearer_token": "token123",
-        "mcp_validate_certs": True,
-        "mcp_manifest_path": str(manifest_file),
+        "server_name": "remote",
+        "server_args": ["--mock"],
+        "server_env": {"FOO": "BAR"},
+        "bearer_token": "token123",
+        "validate_certs": True,
+        "manifest_path": str(manifest_file),
         "persistent_connect_timeout": 15,
         "persistent_command_timeout": 15,
         "persistent_log_messages": False,
@@ -137,7 +137,7 @@ class TestMCPConnection:
         server_name = "remote"
         server_info = {"type": "http", "url": "https://example.com/mcp"}
 
-        loaded_mcp_connection.test_options["mcp_bearer_token"] = None  # No token
+        loaded_mcp_connection.test_options["bearer_token"] = None  # No token
 
         loaded_mcp_connection._create_transport(server_name, server_info)
 
@@ -166,8 +166,8 @@ class TestMCPConnection:
             "args": ["stdio"],
         }
 
-        loaded_mcp_connection.test_options["mcp_server_args"] = ["--verbose"]
-        loaded_mcp_connection.test_options["mcp_server_env"] = {"DEBUG": "1"}
+        loaded_mcp_connection.test_options["server_args"] = ["--verbose"]
+        loaded_mcp_connection.test_options["server_env"] = {"DEBUG": "1"}
 
         loaded_mcp_connection._create_transport(server_name, server_info)
 
@@ -187,8 +187,8 @@ class TestMCPConnection:
         server_name = "remote"
         server_info = {"type": "http", "url": "https://example.com/mcp"}
 
-        loaded_mcp_connection.test_options["mcp_bearer_token"] = "test-token"
-        loaded_mcp_connection.test_options["mcp_validate_certs"] = False
+        loaded_mcp_connection.test_options["bearer_token"] = "test-token"
+        loaded_mcp_connection.test_options["validate_certs"] = False
 
         loaded_mcp_connection._create_transport(server_name, server_info)
 
@@ -230,7 +230,7 @@ class TestMCPConnection:
     ):
         """Verify connection._connect() initializes stdio transport correctly."""
         conn = loaded_mcp_connection
-        conn.test_options["mcp_server_name"] = "mcp-hello-world"
+        conn.test_options["server_name"] = "mcp-hello-world"
 
         mock_transport = MagicMock()
         mock_stdio.return_value = mock_transport
@@ -263,7 +263,7 @@ class TestMCPConnection:
     def test_connect_invalid_transport(self, loaded_mcp_connection):
         """Invalid transport type should raise."""
         """Unknown server_name should raise AnsibleConnectionFailure."""
-        loaded_mcp_connection.test_options["mcp_server_name"] = "unknown-server"
+        loaded_mcp_connection.test_options["server_name"] = "unknown-server"
         with pytest.raises(AnsibleConnectionFailure):
             loaded_mcp_connection._connect()
 
