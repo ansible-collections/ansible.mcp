@@ -1,4 +1,7 @@
 ---
+- ansible.builtin.debug:
+    var: vars
+
 - name: Ensure the Github PAT is defined
   ansible.builtin.fail:
     msg: "Github PAT must be defined using github_mcp_pat variable"
