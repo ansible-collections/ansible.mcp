@@ -1,10 +1,10 @@
 ---
-- name: check temporary file
+- name: Ensure the integration_config.yml file exists
   ansible.builtin.stat:
-    path: /tmp/integration_config.yml
+    path: /home/zuul-worker/.ansible/collections/ansible_collections/ansible/mcp/tests/integration/integration_config.yml
   register: st
 
 - name: Validate that the file exists
   ansible.builtin.fail:
-    msg: "The file /tmp/integration_config.yml does not exist."
+    msg: "The file integration_config.yml does not exist."
   when: not st.stat.exists
