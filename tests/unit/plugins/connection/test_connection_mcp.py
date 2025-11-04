@@ -46,6 +46,24 @@ def manifest_file(tmp_path):
     yield file_path
 
 
+@pytest.fixture
+def empty_manifest_file(tmp_path):
+    """Create a temporary empty MCP manifest JSON file."""
+    file_path = tmp_path / "empty.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump({}, f)
+    yield file_path
+
+
+@pytest.fixture
+def malformed_manifest_file(tmp_path):
+    """Create a temporary malformed MCP manifest JSON file."""
+    file_path = tmp_path / "malformed.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write("{invalid json")
+    yield file_path
+
+
 @pytest.fixture(name="loaded_mcp_connection")
 def fixture_loaded_mcp_connection(manifest_file):
     """
@@ -76,6 +94,129 @@ def fixture_loaded_mcp_connection(manifest_file):
 
 
 class TestMCPConnection:
+    def test_load_server_from_manifest_success(self, loaded_mcp_connection, manifest_file):
+        """Should successfully load server info for a known server."""
+        server_name = "github-mcp-server"
+        expected_info = {
+            "type": "stdio",
+            "command": "/opt/mcp/bin/github-mcp-server",
+            "args": ["stdio"],
+            "description": "GitHub MCP Server - Access GitHub repositories, issues, and pull requests",
+        }
+
+        info = loaded_mcp_connection._load_server_from_manifest(server_name, str(manifest_file))
+        assert info == expected_info
+
+    def test_load_server_from_manifest_file_not_found(self, loaded_mcp_connection):
+        """Should raise AnsibleConnectionFailure if manifest file is not found."""
+        with pytest.raises(AnsibleConnectionFailure, match="MCP manifest not found"):
+            loaded_mcp_connection._load_server_from_manifest(
+                "any-server", "/nonexistent/manifest.json"
+            )
+
+    def test_load_server_from_manifest_server_not_found(self, loaded_mcp_connection, manifest_file):
+        """Should raise AnsibleConnectionFailure if the server is not in the manifest."""
+        server_name = "non-existent-server"
+        with pytest.raises(
+            AnsibleConnectionFailure, match=f"MCP server '{server_name}' not found in manifest"
+        ):
+            loaded_mcp_connection._load_server_from_manifest(server_name, str(manifest_file))
+
+    def test_create_transport_stdio_missing_command(self, loaded_mcp_connection):
+        """Should raise AnsibleConnectionFailure if stdio manifest entry is missing 'command'."""
+        server_name = "invalid_stdio"
+        server_info = {"type": "stdio"}
+        with pytest.raises(
+            AnsibleConnectionFailure, match=f"Manifest for '{server_name}' missing 'command'"
+        ):
+            loaded_mcp_connection._create_transport(server_name, server_info)
+
+    @patch("ansible_collections.ansible.mcp.plugins.connection.mcp.StreamableHTTP", autospec=True)
+    def test_create_transport_http_success_no_token(self, mock_http, loaded_mcp_connection):
+        """Should correctly create an HTTP transport without a bearer token."""
+        server_name = "remote"
+        server_info = {"type": "http", "url": "https://example.com/mcp"}
+
+        loaded_mcp_connection.test_options["mcp_bearer_token"] = None  # No token
+
+        loaded_mcp_connection._create_transport(server_name, server_info)
+
+        mock_http.assert_called_once_with(
+            url="https://example.com/mcp",
+            headers={},
+            validate_certs=True,
+        )
+
+    def test_load_server_from_manifest_json_decode_error(
+        self, loaded_mcp_connection, malformed_manifest_file
+    ):
+        """Should raise AnsibleConnectionFailure for a malformed JSON file."""
+        with pytest.raises(AnsibleConnectionFailure, match="Failed to parse MCP manifest JSON"):
+            loaded_mcp_connection._load_server_from_manifest(
+                "any-server", str(malformed_manifest_file)
+            )
+
+    @patch("ansible_collections.ansible.mcp.plugins.connection.mcp.Stdio", autospec=True)
+    def test_create_transport_stdio_success(self, mock_stdio, loaded_mcp_connection):
+        """Should correctly create a Stdio transport for a stdio server."""
+        server_name = "github-mcp-server"
+        server_info = {
+            "type": "stdio",
+            "command": "/opt/mcp/bin/github-mcp-server",
+            "args": ["stdio"],
+        }
+
+        loaded_mcp_connection.test_options["mcp_server_args"] = ["--verbose"]
+        loaded_mcp_connection.test_options["mcp_server_env"] = {"DEBUG": "1"}
+
+        loaded_mcp_connection._create_transport(server_name, server_info)
+
+        expected_cmd = [
+            "/opt/mcp/bin/github-mcp-server",
+            "stdio",
+            "--verbose",
+        ]
+        mock_stdio.assert_called_once_with(
+            cmd=expected_cmd,
+            env={"DEBUG": "1"},
+        )
+
+    @patch("ansible_collections.ansible.mcp.plugins.connection.mcp.StreamableHTTP", autospec=True)
+    def test_create_transport_http_success_with_token(self, mock_http, loaded_mcp_connection):
+        """Should correctly create an HTTP transport with a bearer token and validation."""
+        server_name = "remote"
+        server_info = {"type": "http", "url": "https://example.com/mcp"}
+
+        loaded_mcp_connection.test_options["mcp_bearer_token"] = "test-token"
+        loaded_mcp_connection.test_options["mcp_validate_certs"] = False
+
+        loaded_mcp_connection._create_transport(server_name, server_info)
+
+        mock_http.assert_called_once_with(
+            url="https://example.com/mcp",
+            headers={"Authorization": "Bearer test-token"},
+            validate_certs=False,
+        )
+
+    def test_create_transport_http_missing_url(self, loaded_mcp_connection):
+        """Should raise AnsibleConnectionFailure if http manifest entry is missing 'url'."""
+        server_name = "invalid_http"
+        server_info = {"type": "http"}
+        with pytest.raises(
+            AnsibleConnectionFailure, match=f"Manifest for '{server_name}' missing 'url'"
+        ):
+            loaded_mcp_connection._create_transport(server_name, server_info)
+
+    def test_create_transport_unknown_transport_type(self, loaded_mcp_connection):
+        """Should raise AnsibleConnectionFailure for an unknown transport type."""
+        server_name = "unknown_transport"
+        server_info = {"type": "ftp"}
+        with pytest.raises(
+            AnsibleConnectionFailure,
+            match=f"Invalid transport type 'ftp' for server '{server_name}'",
+        ):
+            loaded_mcp_connection._create_transport(server_name, server_info)
+
     @patch(
         "ansible_collections.ansible.mcp.plugins.connection.mcp.MCPClient.initialize",
         return_value=None,
@@ -90,7 +231,6 @@ class TestMCPConnection:
         """Verify connection._connect() initializes stdio transport correctly."""
         conn = loaded_mcp_connection
         conn.test_options["mcp_server_name"] = "mcp-hello-world"
-        conn._connected = False
 
         mock_transport = MagicMock()
         mock_stdio.return_value = mock_transport
@@ -105,7 +245,6 @@ class TestMCPConnection:
     @patch("ansible_collections.ansible.mcp.plugins.connection.mcp.StreamableHTTP", autospec=True)
     def test_connect_http_transport(self, mock_http, loaded_mcp_connection):
         """Verify connection uses HTTP transport when configured."""
-        loaded_mcp_connection._connected = False
         mock_transport = MagicMock()
         mock_http.return_value = mock_transport
         # Mock request for initialize
@@ -125,7 +264,6 @@ class TestMCPConnection:
         """Invalid transport type should raise."""
         """Unknown server_name should raise AnsibleConnectionFailure."""
         loaded_mcp_connection.test_options["mcp_server_name"] = "unknown-server"
-        loaded_mcp_connection._connected = False
         with pytest.raises(AnsibleConnectionFailure):
             loaded_mcp_connection._connect()
 

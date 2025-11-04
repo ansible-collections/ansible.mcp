@@ -30,6 +30,8 @@ options:
         elements: str
         vars:
             - name: ansible_mcp_mcp_server_args
+        env:
+            - name: MCP_BEARER_TOKEN
     mcp_server_env:
         description:
             - Additional environment variables to pass to the server when using stdio transport.
@@ -108,6 +110,7 @@ from ansible_collections.ansible.mcp.plugins.plugin_utils.mcp import (
     MCPClient,
     Stdio,
     StreamableHTTP,
+    Transport,
 )
 
 
@@ -203,7 +206,7 @@ class Connection(PersistentConnectionBase):
 
         return manifest[server_name]
 
-    def _create_transport(self, server_name: str, server_info: dict):
+    def _create_transport(self, server_name: str, server_info: dict) -> Transport:
         """Create the appropriate transport based on manifest server info."""
         transport_type = server_info.get("type")
 
