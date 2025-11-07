@@ -1,10 +1,5 @@
 ---
-- name: Ensure the integration_config.yml file exists
-  ansible.builtin.stat:
-    path: /home/zuul-worker/.ansible/collections/ansible_collections/ansible/mcp/tests/integration/integration_config.yml
-  register: st
-
 - name: Validate that the file exists
-  ansible.builtin.fail:
-    msg: "The file integration_config.yml does not exist."
-  when: not st.stat.exists
+  ansible.builtin.assert:
+    that:
+      - ansible_mcp_github_pat is defined
