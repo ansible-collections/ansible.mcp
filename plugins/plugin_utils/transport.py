@@ -123,18 +123,21 @@ class Stdio(Transport):
         """
 
         response = {}
+        buffer = b""
         if self._process:
-            rfd, wfd, efd = select.select([self._process.stdout], [], [], wait_timeout)
-            if not (rfd or wfd or efd):
-                # Process has timeout
-                raise AnsibleConnectionFailure(
-                    f"MCP server response timeout after {wait_timeout} seconds."
-                )
-
-            if self._process.stdout in rfd:
-                response = json.loads(
-                    os.read(self._process.stdout.fileno(), 4096).decode("utf-8").strip()
-                )
+            while True:
+                rfd, wfd, efd = select.select([self._process.stdout], [], [], wait_timeout)
+                if self._process.stdout in rfd:
+                    buffer += os.read(self._process.stdout.fileno(), 4096)
+                    if b"\n" in buffer:
+                        line, buffer = buffer.split(b"\n", 1)
+                        response = json.loads(line.decode("utf-8"))
+                        break
+                else:
+                    # Process has timeout
+                    raise AnsibleConnectionFailure(
+                        f"MCP server response timeout after {wait_timeout} seconds."
+                    )
         return response
 
     def _stdin_write(self, data: dict) -> None:
