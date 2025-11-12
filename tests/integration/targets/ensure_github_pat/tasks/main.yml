@@ -2,4 +2,4 @@
 - name: Validate that the file exists
   ansible.builtin.assert:
     that:
-      - ansible_mcp_github_pat is defined
+      - github_mcp_pat is defined
