@@ -1,9 +1,8 @@
 {
   "github": {
     "type": "http",
-    "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-github"],
-    "description": "GitHub MCP Server - Access GitHub repositories via stdio"
+    "url": "https://api.githubcopilot.com/mcp/",
+    "description": "GitHub MCP Server - Access GitHub repositories, issues, and pull requests"
   },
   "aws": {
     "type": "stdio",

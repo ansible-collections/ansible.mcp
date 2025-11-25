@@ -7,7 +7,7 @@
   "aws-iam-mcp-server": {
     "type": "stdio",
     "command": "uvx",
-    "args": ["awslabs.iam-mcp-server"],
+    "args": ["awslabs.iam-mcp-server@latest"],
     "description": "AWS IAM MCP Server - Manage AWS IAM resources through MCP protocol"
   }
 }
