@@ -24,14 +24,14 @@ which requirements are needed.
 ### Connection plugins
 Name | Description
 --- | ---
-[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst)|Persistent connection to an Model Context Protocol (MCP) server
+[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.mcp_connection.rst)|Persistent connection to an Model Context Protocol (MCP) server
 
 ### Modules
 Name | Description
 --- | ---
-[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.run_tool_module.rst)|Call a specific tool on an MCP server
-[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.server_info_module.rst)|Retrieve MCP server information
-[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.tools_info_module.rst)|Retrieve a list of supported tools from an MCP server
+[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.run_tool_module.rst)|Call a specific tool on an MCP server
+[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.server_info_module.rst)|Retrieve MCP server information
+[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.tools_info_module.rst)|Retrieve a list of supported tools from an MCP server
 
 <!--end collection content-->
 
@@ -72,7 +72,7 @@ for more details.
 ## Release notes
 
 See the
-[changelog](https://github.com/ansible-collections/ansible.mcp/tree/main/CHANGELOG.rst).
+[changelog](https://github.com/ansible-collections/ansible.mcp/tree/stable-1/CHANGELOG.rst).
 
 ## Roadmap
 
