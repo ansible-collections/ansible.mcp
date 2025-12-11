@@ -24,9 +24,6 @@ Connection
 New Modules
 -----------
 
-Private
-~~~~~~~
-
 - run_tool - Call a specific tool on an MCP server
 - server_info - Retrieve MCP server information
 - tools_info - Retrieve a list of supported tools from an MCP server
