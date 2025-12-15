@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - playbook/aws_ccapi_demo_validation_failure - A playbook to showcase client-side validation failure with AWS CCAPI server
+    (https://github.com/ansible-collections/ansible.mcp/pull/30).
