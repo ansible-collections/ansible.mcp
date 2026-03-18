@@ -15,9 +15,6 @@ on:
 
 jobs:
   integration:
-    
-    environment: protected # requires manual approval within GitHub Actions to proceed
-    
     env:
       source: "./source"
     runs-on: ubuntu-latest
