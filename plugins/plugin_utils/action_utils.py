@@ -46,6 +46,8 @@ class ActionResult:
     content: list = field(default_factory=list)
     is_error: Optional[bool] = None
     structured_content: Optional[Any] = None
+    server_name: str = ""
+    tool_name: str = ""
 
     def to_dict(self):
         """Convert the result to a dictionary, excluding None values."""

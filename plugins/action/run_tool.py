@@ -61,6 +61,9 @@ class ActionModule(ActionBase):
         try:
             response = self._execute_tool(tool_name, tool_args)
             self._populate_result(action_result, response, tool_name)
+            action_result.server_name = self._info["serverInfo"]["name"]
+            action_result.tool_name = tool_name
+
         except Exception as e:
             action_result.failed = True
             action_result.msg = str(e)
@@ -104,6 +107,7 @@ class ActionModule(ActionBase):
             Exception: If the tool execution fails at the connection level.
         """
         conn = Connection(self._connection.socket_path)
+        self._info = conn.server_info()
         return conn.call_tool(tool_name, args=tool_args)
 
     def _populate_result(

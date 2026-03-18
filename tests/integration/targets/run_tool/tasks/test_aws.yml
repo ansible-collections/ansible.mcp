@@ -16,6 +16,10 @@
       - aws_list_roles_result is not failed
       - aws_list_roles_result.content is defined
       - aws_list_roles_result.changed == false
+      - '"server_name" in aws_list_roles_result'
+      - aws_list_roles_result.server_name == "awslabs.iam-mcp-server"
+      - '"tool_name" in aws_list_roles_result'
+      - aws_list_roles_result.tool_name == "list_roles"
     fail_msg: "list_roles tool call failed"
     success_msg: "list_roles tool call succeeded"
   when: aws_list_roles_result is not failed
@@ -34,6 +38,10 @@
       - aws_list_groups_result is not failed
       - aws_list_groups_result.content is defined
       - aws_list_groups_result.changed == false
+      - '"server_name" in aws_list_groups_result'
+      - aws_list_groups_result.server_name == "awslabs.iam-mcp-server"
+      - '"tool_name" in aws_list_groups_result'
+      - aws_list_groups_result.tool_name == "list_groups"
     fail_msg: "list_groups tool call failed"
     success_msg: "list_groups tool call succeeded"
   when: aws_list_groups_result is not failed
@@ -53,6 +61,10 @@
       - aws_list_policies_result is not failed
       - aws_list_policies_result.content is defined
       - aws_list_policies_result.changed == false
+      - '"server_name" in aws_list_policies_result'
+      - aws_list_policies_result.server_name == "awslabs.iam-mcp-server"
+      - '"tool_name" in aws_list_policies_result'
+      - aws_list_policies_result.tool_name == "list_policies"
     fail_msg: "list_policies tool call failed"
     success_msg: "list_policies tool call succeeded"
   when: aws_list_policies_result is not failed

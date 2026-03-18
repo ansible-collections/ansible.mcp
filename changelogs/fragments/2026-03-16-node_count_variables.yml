@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - run_tool - Adds support for server_name and tool_name for node count query support and updates integration tests and relevant documentation
+    (https://github.com/ansible-collections/ansible.mcp/pull/38).
