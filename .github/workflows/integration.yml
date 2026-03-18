@@ -1,0 +1,61 @@
+name: integration
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.sha }}'
+  cancel-in-progress: true
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - labeled
+      - unlabeled
+      - synchronize
+
+jobs:
+  integration:
+    
+    environment: protected # requires manual approval within GitHub Actions to proceed
+    
+    env:
+      source: "./source"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible-version:
+          - devel
+        python-version:
+          - "3.12"
+    name: "ansible-test-integration-py${{ matrix.python-version }}-${{ matrix.ansible-version }}"
+    steps:
+      - name: Checkout collection
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.source }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: "0"
+
+      - name: checkout amazon.aws
+        uses: ansible-network/github_actions/.github/actions/checkout_dependency@main
+        with:
+          repository: ansible-collections/amazon.aws
+          path: ${{ env.amazon }}
+          ref: main
+
+      - name: Build and install collection
+        id: install-src
+        uses: ansible-network/github_actions/.github/actions/build_install_collection@main
+        with:
+          install_python_dependencies: true
+          source_path: ${{ env.source }}
+
+      - uses: ansible/ansible-test-auth@v1
+
+      - name: Run integration tests
+        uses: ansible-network/github_actions/.github/actions/ansible_test_integration@main
+        with:
+          collection_path: ${{ steps.install-src.outputs.collection_path }}
+          python_version: ${{ matrix.python-version }}
+          ansible_version: ${{ matrix.ansible-version }}
