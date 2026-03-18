@@ -1,9 +1,5 @@
 name: integration
 
-concurrency:
-  group: '${{ github.workflow }} @ ${{ github.sha }}'
-  cancel-in-progress: true
-
 on:
   pull_request_target:
     types:
@@ -12,7 +8,9 @@ on:
       - labeled
       - unlabeled
       - synchronize
-
+    branches:
+      - main
+      - stable-*
 jobs:
   integration:
     env:
