@@ -37,13 +37,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: "0"
 
-      - name: checkout amazon.aws
-        uses: ansible-network/github_actions/.github/actions/checkout_dependency@main
-        with:
-          repository: ansible-collections/amazon.aws
-          path: ${{ env.amazon }}
-          ref: main
-
       - name: Build and install collection
         id: install-src
         uses: ansible-network/github_actions/.github/actions/build_install_collection@main
