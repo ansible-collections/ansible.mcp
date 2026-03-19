@@ -60,3 +60,4 @@ jobs:
           collection_path: ${{ steps.install-src.outputs.collection_path }}
           python_version: ${{ matrix.python-version }}
           ansible_version: ${{ matrix.ansible-version }}
+          ansible_test_requirement_files: "test-requirements.txt"
