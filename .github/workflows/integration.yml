@@ -53,9 +53,9 @@ jobs:
                 } catch (err) {
                     core.setFailed(`Failed to write file: ${err.message}`);
                 }
-      
-      - name: Check if ansible.utils is installed in the expected path
-        run: ls -lrt /home/runner/.ansible/collections/ansible_collections/ansible/
+
+      - name: Install collection ansible.utils
+        run: ansible-galaxy collection install ansible.utils -p /home/runner/.ansible/collections/ --force
         shell: bash
 
       - name: Run integration tests
