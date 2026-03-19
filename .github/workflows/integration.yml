@@ -27,7 +27,7 @@ jobs:
         id: install-src
         uses: ansible-network/github_actions/.github/actions/build_install_collection@main
         with:
-          install_python_dependencies: true
+          install_python_dependencies: false
           source_path: ${{ env.source }}
 
       - uses: ansible/ansible-test-auth@v1
