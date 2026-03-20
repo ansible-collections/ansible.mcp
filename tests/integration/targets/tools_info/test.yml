@@ -11,6 +11,8 @@
     - name: Validate that the module response is as expected
       ansible.builtin.assert:
         that:
+          - '"server_name" in result'
+          - result.server_name == "github-mcp-server"
           - '"tools" in result'
           - result.tools | length > 0
           - result.tools | selectattr('name', 'equalto', 'pull_request_read') | list | length == 1

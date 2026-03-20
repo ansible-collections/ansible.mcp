@@ -21,6 +21,12 @@ EXAMPLES = """
 """
 
 RETURN = """
+server_name:
+    description: Name of the MCP server.
+    returned: success
+    type: str
+    version_added: 1.1.0
+    sample: "github-server"
 tools:
     description: List of supported tools.
     returned: success

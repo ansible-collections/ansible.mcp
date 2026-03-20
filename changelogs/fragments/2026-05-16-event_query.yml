@@ -1,0 +1,6 @@
+minor_changes:
+  - tools_info - Enhanced the action plugin to return the ``server_name`` metadata
+    provided by the MCP server (https://github.com/ansible-collections/ansible.mcp/pull/36).
+  - extensions/audit/event_query.yml - Added JQ query support for auditing
+    MCP server events via indirect Node Query Count
+    (https://github.com/ansible-collections/ansible.mcp/pull/36).
