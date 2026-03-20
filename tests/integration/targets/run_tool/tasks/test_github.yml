@@ -16,6 +16,10 @@
       - github_search_result.content is defined
       - github_search_result.content is iterable
       - github_search_result.changed == false
+      - '"server_name" in github_search_result'
+      - github_search_result.server_name == "github-mcp-server"
+      - '"tool_name" in github_search_result'
+      - github_search_result.tool_name == "search_repositories"
     fail_msg: "search_repositories tool call failed"
     success_msg: "search_repositories tool call succeeded"
 
@@ -35,6 +39,10 @@
       - github_file_result.content is defined
       - github_file_result.content | length > 0
       - github_file_result.changed == false
+      - '"server_name" in github_file_result'
+      - github_file_result.server_name == "github-mcp-server"
+      - '"tool_name" in github_file_result'
+      - github_file_result.tool_name == "get_file_contents"
     fail_msg: "get_file_contents tool call failed"
     success_msg: "get_file_contents tool call succeeded"
 
@@ -54,6 +62,10 @@
       - galaxy_file_result.content is defined
       - galaxy_file_result.content | length > 0
       - galaxy_file_result.changed == false
+      - '"server_name" in galaxy_file_result'
+      - galaxy_file_result.server_name == "github-mcp-server"
+      - '"tool_name" in galaxy_file_result'
+      - galaxy_file_result.tool_name == "get_file_contents"
     fail_msg: "galaxy.yml retrieval failed"
     success_msg: "galaxy.yml retrieval succeeded"
 
@@ -70,5 +82,9 @@
       - popular_collections_result is not failed
       - popular_collections_result.content is defined
       - popular_collections_result.changed == false
+      - '"server_name" in popular_collections_result'
+      - popular_collections_result.server_name == "github-mcp-server"
+      - '"tool_name" in popular_collections_result'
+      - popular_collections_result.tool_name == "search_repositories"
     fail_msg: "Popular collections search failed"
     success_msg: "Popular collections search succeeded"

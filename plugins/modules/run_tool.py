@@ -77,4 +77,16 @@ structured_content:
     description: Optional structured result of the tool call.
     returned: when provided by the MCP server
     type: dict
+server_name:
+    description: Name of the MCP server.
+    returned: success
+    type: str
+    version_added: 1.1.0
+    sample: "github-server"
+tool_name:
+    description: Name of the tool used.
+    returned: success
+    type: str
+    version_added: 1.1.0
+    sample: "search_repositories"
 """
