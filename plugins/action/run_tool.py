@@ -63,7 +63,6 @@ class ActionModule(ActionBase):
             self._populate_result(action_result, response, tool_name)
             action_result.server_name = self._info["serverInfo"]["name"]
             action_result.tool_name = tool_name
-
         except Exception as e:
             action_result.failed = True
             action_result.msg = str(e)

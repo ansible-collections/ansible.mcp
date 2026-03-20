@@ -1,0 +1,20 @@
+---
+- name: Run ansible.mcp.run_tool tests
+  hosts: all
+  gather_facts: false
+
+  roles:
+    - role: setup_node_query
+
+  tasks:
+    - name: Display test host
+      ansible.builtin.debug:
+        msg: "Running tests against: {{ inventory_hostname }}"
+
+    - name: Run GitHub MCP tool tests
+      ansible.builtin.include_tasks: tasks/test_github.yml
+      when: inventory_hostname == 'github'
+
+    - name: Run AWS MCP tool tests
+      ansible.builtin.include_tasks: tasks/test_aws.yml
+      when: inventory_hostname == 'aws'

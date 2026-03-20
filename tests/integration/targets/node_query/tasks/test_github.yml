@@ -1,0 +1,73 @@
+---
+- name: Search ansible-collections repositories
+  ansible.mcp.run_tool:
+    name: "search_repositories"
+    args:
+      query: "org:ansible-collections language:python"
+  register: github_search_result
+
+- name: Run jq query on aggregated GitHub tool data
+  ansible.builtin.set_fact:
+    github_node_data: "{{ github_search_result | to_json | node_jq(event_node_queries.run_tool) }}"
+
+- name: Validate GitHub results are as expected
+  ansible.builtin.assert:
+    that:
+      - github_node_data == expected_result
+  vars:
+    expected_result:
+      - canonical_facts:
+          server_name: "github-mcp-server"
+          tool_name: "search_repositories"
+        facts:
+          device_type: "resource"
+          infra_bucket: "mcp"
+
+- name: Get Server Info
+  ansible.mcp.server_info:
+  register: github_server_info
+
+- name: Run jq query on Server Info result
+  ansible.builtin.set_fact:
+    transformed_server_info: "{{ github_server_info | to_json | node_jq(event_node_queries.server_info) }}"
+
+- name: Validate server_info event transformation
+  ansible.builtin.assert:
+    that:
+      - transformed_server_info == expected_server_info_result
+    fail_msg: |
+      Transformation failed for server_info.
+      Actual: {{ transformed_server_info | to_nice_json }}
+      Expected: {{ expected_server_info_result | to_nice_json }}
+  vars:
+    expected_server_info_result:
+      - canonical_facts:
+          server_name: "github-mcp-server"
+        facts:
+          device_type: "server"
+          infra_bucket: "mcp"
+
+- name: Get Tools Info
+  ansible.mcp.tools_info:
+  register: github_tools_info
+
+- name: Run jq query on Tools Info result
+  ansible.builtin.set_fact:
+    transformed_tools: "{{ github_tools_info | to_json | node_jq(event_node_queries.tools_info) }}"
+
+- name: Validate tools_info event transformation
+  ansible.builtin.assert:
+    that:
+      - expected_tool in transformed_tools
+    fail_msg: |
+      Comparison failed. 
+      Looking for: {{ expected_tool | to_json }}
+      In: {{ transformed_tools | to_json }}
+  vars:
+    expected_tool:
+      canonical_facts:
+        server_name: "github-mcp-server"
+        tool_name: "search_repositories"
+      facts:
+        device_type: "tool"
+        infra_bucket: "mcp"

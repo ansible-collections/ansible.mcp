@@ -1,2 +1,4 @@
 # required for aws mcp server
 uv
+# Used for indirect node count tests targets
+jq

@@ -1,0 +1,43 @@
+---
+ansible.mcp.run_tool:
+  query: >-
+    select(.server_name != null and .tool_name != null)
+    | {
+        canonical_facts: {
+          server_name: .server_name,
+          tool_name: .tool_name
+        },
+        facts: {
+          device_type: "resource",
+          infra_bucket: "mcp"
+        }
+      }
+
+ansible.mcp.server_info:
+  query: >-
+    .server_info
+    | select(.serverInfo.name != null)
+    | {
+        canonical_facts: {
+          server_name: .serverInfo.name,
+        },
+        facts: {
+          device_type: "server",
+          infra_bucket: "mcp"
+        }
+      }
+
+ansible.mcp.tools_info:
+  query: >-
+    .server_name as $sn | .tools[]
+    | select(.name != null)
+    | {
+        canonical_facts: {
+          server_name: $sn,
+          tool_name: .name
+        },
+        facts: {
+          device_type: "tool",
+          infra_bucket: "mcp"
+        }
+      }

@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  gather_facts: true
+
+  vars:
+    ansible_mcp_hosts: ['github', 'aws']
+    ansible_mcp_inventory_file_path: "{{ playbook_dir }}/inventory.yml"
+
+  roles:
+    - role: prepare_inventory
