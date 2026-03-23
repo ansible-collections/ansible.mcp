@@ -2,9 +2,9 @@
 
 ## Overview
 
-In the context of Ansible automation, **indirect node queries** refer to discovering or verifying the scope of what you automate **through controllers, APIs, and structured task results**—rather than connecting directly to each workload (for example each EC2 instance, database, or bastion). That pattern applies strongly to **AWS resources** when automation goes through **Model Context Protocol (MCP) servers and tools** exposed by **ansible.mcp**: you infer usage from **module JSON** (what server was used, which tools exist, which tools ran) instead of polling every node.
+In the context of Ansible automation, **indirect node queries** refer to discovering or verifying the scope of what you automate **through controllers, APIs, and structured task results** -- rather than connecting directly to each workload (for example each EC2 instance, database, or bastion). That pattern applies strongly to **AWS resources** when automation goes through **Model Context Protocol (MCP) servers and tools** exposed by **ansible.mcp**: you infer usage from **module JSON** (what server was used, which tools exist, which tools ran) instead of polling every node.
 
-This collection implements that idea for MCP-driven flows in **`event_query.yml`**: **jq** programs keyed by `ansible.mcp.server_info`, `ansible.mcp.tools_info`, and `ansible.mcp.run_tool` map each module’s **result document** into audit events (`canonical_facts` and `facts`). If a `select(...)` guard fails, **jq emits nothing** and **no audit event** is produced.
+This collection implements that idea for MCP-driven flows in **`event_query.yml`**: **jq** programs keyed by `ansible.mcp.server_info`, `ansible.mcp.tools_info`, and `ansible.mcp.run_tool` map each module's **result document** into audit events (`canonical_facts` and `facts`). If a `select(...)` guard fails, **jq emits nothing** and **no audit event** is produced.
 
 This file explains:
 
@@ -15,7 +15,7 @@ This file explains:
 
 ## What Are Indirect Node Queries?
 
-Rather than connecting directly to each node to assess automation scope (for example a **VM, RDS instance, or Lambda** behind an AWS API), **indirect node queries** use **management-layer or controller-visible data**—here, **JSON from ansible.mcp modules** after tasks talk to MCP servers (including servers oriented toward **AWS** operations in this repository’s playbooks).
+Rather than connecting directly to each node to assess automation scope (for example a **VM, RDS instance, or Lambda** behind an AWS API), **indirect node queries** use **management-layer or controller-visible data** - here, **JSON from ansible.mcp modules** after tasks talk to MCP servers (including servers oriented toward **AWS** operations in this repository's playbooks).
 
 In **ansible.mcp**, this involves:
 
@@ -41,7 +41,7 @@ Using indirect node queries via **ansible.mcp** module results and **`event_quer
 
 In practical terms, for this collection:
 
-- Enables **guardrails** to see which MCP **servers**, **tool catalog entries**, and **tool invocations** (`run_tool`) appear in task results—relevant when those tools drive **AWS** (or other) resource operations
+- Enables **guardrails** to see which MCP **servers**, **tool catalog entries**, and **tool invocations** (`run_tool`) appear in task results -- relevant when those tools drive **AWS** (or other) resource operations
 - Reduces operational risk and improves **predictability** by tying audit output to the same JSON Ansible records for those modules
 
 ## Implementation: `event_query.yml`
@@ -74,7 +74,7 @@ Every emitted object has:
 |------|----------------|
 | Input | Binds top-level `.server_name` as `$sn`, then iterates `.tools[]`. |
 | Filter | `select(.name != null)` per element. |
-| `canonical_facts` | `server_name: $sn`, `tool_name: .name` — one event per tool. |
+| `canonical_facts` | `server_name: $sn`, `tool_name: .name` -- one event per tool. |
 | `facts` | `device_type: "tool"`, `infra_bucket: "mcp"`. |
 
 ## Why This Is a Good Practice
