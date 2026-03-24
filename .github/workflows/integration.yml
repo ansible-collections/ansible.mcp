@@ -71,4 +71,4 @@ jobs:
           collection_path: ${{ steps.install-collection.outputs.collection_path }}
           python_version: ${{ env.python_version }}
           ansible_version: ${{ env.ansible_version }}
-          ansible_test_requirement_files: "test-requirements.txt"
+          ansible_test_requirement_files: "tests/integration/requirements.txt"
