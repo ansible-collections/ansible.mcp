@@ -1,0 +1,8 @@
+{
+  "awslabs.ccapi-mcp-server": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["awslabs.ccapi-mcp-server@latest"],
+    "description": "AWS CCAPI MCP Server - Manages AWS infrastructure via Cloud Control API"
+  }
+}

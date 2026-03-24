@@ -1,0 +1,13 @@
+all:
+  children:
+    mcp_servers:
+      hosts:
+        aws_ccapi_server:
+          ansible_connection: ansible.mcp.mcp
+          ansible_mcp_server_name: awslabs.ccapi-mcp-server
+          ansible_mcp_server_args: []
+          ansible_command_timeout: 3600
+          ansible_mcp_manifest_path: "{{ playbook_dir }}/manifest.json"
+          ansible_mcp_server_env:
+            AWS_REGION: "{{ region }}"
+            AWS_PROFILE: "{{ profile }}"

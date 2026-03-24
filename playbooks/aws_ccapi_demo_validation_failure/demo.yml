@@ -1,0 +1,75 @@
+---
+- name: AWS Cloud Control API MCP Server Demo - Validation Failure Examples
+  hosts: aws_ccapi_server
+  gather_facts: false
+
+  tasks:
+    - name: Get server information
+      ansible.mcp.server_info:
+      register: server_info
+
+    - name: Display server details
+      ansible.builtin.debug:
+        msg: "Connected to {{ server_info.server_info.serverInfo.name }} version {{ server_info.server_info.serverInfo.version }}"
+
+    - name: List available tools
+      ansible.mcp.tools_info:
+      register: tools_list
+
+    - name: Show available tools count
+      ansible.builtin.debug:
+        msg: "Available tools: {{ tools_list.tools | length }}"
+
+    - name: Example 1 - Missing required parameter
+      ansible.builtin.debug:
+        msg: "Attempting to call get_aws_session_info without the required 'query' parameter"
+      failed_when: false
+
+    - name: Call tool with missing required parameter (should fail validation)
+      ansible.mcp.run_tool:
+        name: get_aws_session_info
+        args: {}
+      register: missing_param_result
+      ignore_errors: true
+
+    - name: Display validation error for missing parameter
+      ansible.builtin.debug:
+        msg: "{{ missing_param_result.msg }}"
+      when: missing_param_result.failed | default(false)
+
+    - name: Example 2 - Invalid parameter type
+      ansible.builtin.debug:
+        msg: "Attempting to call get_aws_session_info with 'query' as a number instead of string"
+      failed_when: false
+
+    - name: Call tool with invalid parameter type (should fail validation)
+      ansible.mcp.run_tool:
+        name: get_aws_session_info
+        args:
+          environment_token: 12345
+      register: invalid_type_result
+      ignore_errors: true
+
+    - name: Display validation error for invalid type
+      ansible.builtin.debug:
+        msg: "{{ invalid_type_result.msg }}"
+      when: invalid_type_result.failed | default(false)
+
+    - name: Example 3 - Unknown parameter
+      ansible.builtin.debug:
+        msg: "Attempting to call get_aws_session_info with an unknown parameter 'invalid_param'"
+      failed_when: false
+
+    - name: Call tool with unknown parameter (should fail validation)
+      ansible.mcp.run_tool:
+        name: get_aws_session_info
+        args:
+          environment_token: "the_env_token"
+          invalid_param: "this should not be here"
+      register: unknown_param_result
+      ignore_errors: true
+
+    - name: Display validation error for unknown parameter
+      ansible.builtin.debug:
+        msg: "{{ unknown_param_result.msg }}"
+      when: unknown_param_result.failed | default(false)
