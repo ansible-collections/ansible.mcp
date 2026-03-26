@@ -6,22 +6,27 @@
       query: "org:ansible-collections language:python"
   register: github_search_result
 
+- name: Validate tool_classification is present and correct for read-only tool
+  ansible.builtin.assert:
+    that:
+      - github_search_result.tool_classification is defined
+      - github_search_result.tool_classification.read_only == true
+      - github_search_result.tool_classification.source in ["annotation", "heuristic"]
+    fail_msg: |
+      tool_classification missing or incorrect.
+      Actual: {{ github_search_result.tool_classification | default('undefined') }}
+
 - name: Run jq query on aggregated GitHub tool data
   ansible.builtin.set_fact:
     github_node_data: "{{ github_search_result | to_json | node_jq(event_node_queries.run_tool) }}"
 
-- name: Validate GitHub results are as expected
+- name: Validate read-only tool produces no audit event
   ansible.builtin.assert:
     that:
-      - github_node_data == expected_result
-  vars:
-    expected_result:
-      - canonical_facts:
-          server_name: "github-mcp-server"
-          tool_name: "search_repositories"
-        facts:
-          device_type: "resource"
-          infra_bucket: "mcp"
+      - github_node_data == []
+    fail_msg: |
+      Read-only tool should not produce audit events.
+      Actual: {{ github_node_data | to_nice_json }}
 
 - name: Get Server Info
   ansible.mcp.server_info:
