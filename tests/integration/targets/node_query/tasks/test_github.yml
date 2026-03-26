@@ -28,6 +28,35 @@
       Read-only tool should not produce audit events.
       Actual: {{ github_node_data | to_nice_json }}
 
+- name: Construct synthetic mutating tool result
+  ansible.builtin.set_fact:
+    synthetic_mutating_result:
+      server_name: "github-mcp-server"
+      tool_name: "create_issue"
+      content:
+        - type: text
+          text: "Issue created"
+      tool_classification:
+        read_only: false
+        destructive: false
+        source: "heuristic"
+
+- name: Run jq query on synthetic mutating result
+  ansible.builtin.set_fact:
+    mutating_node_data: "{{ synthetic_mutating_result | to_json | node_jq(event_node_queries.run_tool) }}"
+
+- name: Validate mutating tool produces an audit event
+  ansible.builtin.assert:
+    that:
+      - mutating_node_data | length == 1
+      - mutating_node_data[0].canonical_facts.server_name == "github-mcp-server"
+      - mutating_node_data[0].canonical_facts.tool_name == "create_issue"
+      - mutating_node_data[0].facts.device_type == "resource"
+      - mutating_node_data[0].facts.infra_bucket == "mcp"
+    fail_msg: |
+      Mutating tool should produce exactly one audit event.
+      Actual: {{ mutating_node_data | to_nice_json }}
+
 - name: Get Server Info
   ansible.mcp.server_info:
   register: github_server_info
