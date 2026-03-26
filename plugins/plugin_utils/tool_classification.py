@@ -5,6 +5,7 @@
 
 from typing import Any, Dict
 
+
 # Verb prefixes that indicate read-only (non-mutating) tools, derived from
 # empirical analysis of 76+ tools across AWS EC2, Cloud Control API, IAM,
 # and Azure MCP servers.
