@@ -107,6 +107,9 @@ from ansible_collections.ansible.utils.plugins.plugin_utils.connection_base impo
 )
 
 from ansible_collections.ansible.mcp.plugins.plugin_utils.client import MCPClient
+from ansible_collections.ansible.mcp.plugins.plugin_utils.tool_classification import (
+    classify_tool as _classify_tool,
+)
 from ansible_collections.ansible.mcp.plugins.plugin_utils.transport import (
     Stdio,
     StreamableHTTP,
@@ -280,6 +283,16 @@ class Connection(PersistentConnectionBase):
     def validate(self, tool: str, **kwargs: Any) -> None:
         """Validates arguments against a tool's schema (client-side validation)."""
         return self._client.validate(tool, **kwargs)
+
+    @ensure_connected
+    def classify_tool(self, tool_name: str) -> Dict[str, Any]:
+        """Classify a tool as read-only or mutating using cached tool definitions.
+
+        Uses ToolAnnotations from the MCP server when available, otherwise
+        falls back to a verb-prefix heuristic on the tool name.
+        """
+        tool_def = self._client.get_tool(tool_name)
+        return _classify_tool(tool_def)
 
     @ensure_connected
     def server_info(self) -> Dict[str, Any]:
