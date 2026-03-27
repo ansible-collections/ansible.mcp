@@ -93,7 +93,7 @@ tool_classification:
     description:
         - Classification of the tool as read-only or mutating for indirect node counting.
         - Uses MCP ToolAnnotations (readOnlyHint) when provided by the server, otherwise
-          falls back to a verb-prefix heuristic on the tool name.
+          falls back to a verb-pattern heuristic on the tool name.
     returned: success
     type: dict
     version_added: 1.2.0
@@ -101,15 +101,17 @@ tool_classification:
         read_only:
             description: True if the tool only reads and does not modify state.
             type: bool
-        destructive:
-            description: True if the tool may delete or destructively modify resources.
-            type: bool
         source:
-            description: Whether classification came from MCP ToolAnnotations or verb-prefix heuristic.
+            description: Whether classification came from MCP ToolAnnotations or verb-pattern heuristic.
             type: str
             choices: ["annotation", "heuristic"]
+        destructive:
+            description:
+                - True if the tool may delete or destructively modify resources.
+                - Only present when the MCP server provides a destructiveHint annotation.
+            returned: when provided by MCP server annotations
+            type: bool
     sample:
         read_only: false
-        destructive: false
         source: "heuristic"
 """
