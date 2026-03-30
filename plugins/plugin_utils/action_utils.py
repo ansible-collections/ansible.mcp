@@ -48,6 +48,7 @@ class ActionResult:
     structured_content: Optional[Any] = None
     server_name: str = ""
     tool_name: str = ""
+    tool_classification: Optional[Dict[str, Any]] = None
 
     def to_dict(self):
         """Convert the result to a dictionary, excluding None values."""

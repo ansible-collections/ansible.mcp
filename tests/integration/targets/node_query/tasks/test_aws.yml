@@ -7,26 +7,27 @@
   no_log: true
   register: iam_tool_result
 
+- name: Validate tool_classification is present and correct for read-only tool
+  ansible.builtin.assert:
+    that:
+      - iam_tool_result.tool_classification is defined
+      - iam_tool_result.tool_classification.read_only == true
+      - iam_tool_result.tool_classification.source in ["annotation", "heuristic"]
+    fail_msg: |
+      tool_classification missing or incorrect.
+      Actual: {{ iam_tool_result.tool_classification | default('undefined') }}
+
 - name: Run jq query on MCP result
   ansible.builtin.set_fact:
     transformed_node: "{{ iam_tool_result | to_json | node_jq(event_node_queries.run_tool) }}"
 
-- name: Validate MCP event transformation
+- name: Validate read-only tool produces no audit event
   ansible.builtin.assert:
     that:
-      - transformed_node == expected_run_tool_result
+      - transformed_node == []
     fail_msg: |
-      Transformation failed. 
-      Result: {{ transformed_node | to_nice_json }}
-      Expected: {{ expected_run_tool_result | to_nice_json }}
-  vars:
-    expected_run_tool_result:
-      - canonical_facts:
-          server_name: "awslabs.iam-mcp-server"
-          tool_name: "list_groups"
-        facts:
-          device_type: "resource"
-          infra_bucket: "mcp"
+      Read-only tool should not produce audit events.
+      Actual: {{ transformed_node | to_nice_json }}
 
 - name: Get Server Info
   ansible.mcp.server_info:

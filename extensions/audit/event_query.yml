@@ -2,6 +2,7 @@
 ansible.mcp.run_tool:
   query: >-
     select(.server_name != null and .tool_name != null)
+    | select(.tool_classification.read_only != true)
     | {
         canonical_facts: {
           server_name: .server_name,

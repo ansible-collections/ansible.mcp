@@ -56,8 +56,24 @@ Every emitted object has:
 | Step | jq behavior |
 |------|----------------|
 | Filter | `select(.server_name != null and .tool_name != null)` on the module result root. |
+| Classification filter | `select(.tool_classification.read_only != true)` -- only mutating tool calls produce audit events. |
 | `canonical_facts` | `server_name`, `tool_name`. |
 | `facts` | `device_type: "resource"`, `infra_bucket: "mcp"`. |
+
+#### Tool Classification for Indirect Node Counting
+
+Each `run_tool` invocation includes a `tool_classification` field that indicates whether the tool is read-only (query) or mutating (manages a resource). The `event_query.yml` JQ query filters on this field so that **only mutating tool calls count as indirect nodes**.
+
+The classification uses two strategies in priority order:
+
+1. **MCP ToolAnnotations** (`readOnlyHint`): When the MCP server provides protocol-level annotations on its tool definitions (e.g. Azure MCP Server), these are used directly. The classification `source` is `"annotation"`.
+2. **Verb-pattern heuristic**: When annotations are not available (e.g. AWS and GCP MCP servers), the tool name is matched against known read-only verbs (`list`, `get`, `describe`, `find`, `check`, `search`, `show`, `simulate`, `read`, `view`) using a regex that handles standard names (`list_instances`), namespaced names (`github_list_issues`, `aws.ec2.describe_instances`), and case-insensitive variants (`GetResource`). The classification `source` is `"heuristic"`.
+
+This approach relies on the empirically verified pattern that **MCP tools are single-resource operators for mutations** -- each mutating tool invocation corresponds to exactly one managed entity. Read-only tools (listing, querying) are excluded from the node count.
+
+The classification logic lives in `plugins/plugin_utils/tool_classification.py` and runs inside the persistent connection process using already-cached tool definitions (zero additional MCP server calls).
+
+**Important:** While `ansible.mcp` classifies the action (read-only vs. mutating), the **reporting layer (AAP) must filter by `server_name`** to distinguish between infrastructure nodes (e.g. AWS, Azure, GCP servers managing VMs, storage, networking) and non-infrastructure entity changes (e.g. GitHub servers managing issues, PRs, repositories). Not every MCP server manages infrastructure -- see the `server_name` field in audit events for downstream filtering.
 
 ### `ansible.mcp.server_info`
 
@@ -86,3 +102,9 @@ Every emitted object has:
 | Efficient | No extra per-node polling; maps existing module output |
 | Integrated | Fits **ansible.mcp** and provider-agnostic MCP usage in this collection (for example GitHub or cloud demos) |
 | Reliable | Stable envelope (`canonical_facts` / `facts`) and behavior aligned with **`event_query.yml`** |
+
+## Extending Tool Classification
+
+To add new read-only verbs, edit the `READ_ONLY_VERBS` tuple in `plugins/plugin_utils/tool_classification.py`. Verbs are matched using a regex at word boundaries, so add the bare verb stem (e.g. `"query"`, not `"query_"`). The regex handles standard names, namespaced names, and case-insensitive variants automatically.
+
+When an MCP server starts publishing `ToolAnnotations` (per the MCP 2025-06-18 spec), those annotations take priority over the heuristic automatically -- no code changes required.

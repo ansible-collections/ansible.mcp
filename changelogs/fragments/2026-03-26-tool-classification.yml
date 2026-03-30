@@ -1,0 +1,10 @@
+minor_changes:
+  - run_tool - Added ``tool_classification`` to task results, classifying each
+    MCP tool invocation as read-only or mutating for accurate indirect node
+    counting. Uses MCP ToolAnnotations when available and falls back to a
+    verb-prefix heuristic
+    (https://github.com/ansible-collections/ansible.mcp/pull/43).
+  - extensions/audit/event_query.yml - Updated the ``run_tool`` JQ query to
+    filter out read-only tool calls so only mutating operations produce audit
+    events for indirect node counting
+    (https://github.com/ansible-collections/ansible.mcp/pull/43).
