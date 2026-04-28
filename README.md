@@ -66,7 +66,7 @@ ansible.mcp.tools_info|Retrieve a list of supported tools from an MCP server
 
 ## Testing
 
-This collection is tested using GitHub Actions. To learn more about testing, refer to [CI.md](https://github.com/ansible-collections/ansible.mcp/blob/main/CI.md).
+This collection is tested using GitHub Actions. To learn more about testing, refer to [CI.md](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/CI.md).
 
 ## Installation
 
@@ -113,7 +113,7 @@ For support and questions about this collection:
 ## Release notes
 
 See the
-[changelog](https://github.com/ansible-collections/ansible.mcp/tree/main/CHANGELOG.rst).
+[changelog](https://github.com/ansible-collections/ansible.mcp/tree/stable-1/CHANGELOG.rst).
 
 ## More information
 
