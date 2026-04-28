@@ -48,12 +48,19 @@ which requirements are needed.
 ## Included content
 
 <!--start collection content-->
+### Connection Plugins
+Name | Description
+--- | ---
+ansible.mcp.mcp|Persistent connection to a Model Context Protocol (MCP) server
+
 ### Modules
 Name | Description
 --- | ---
 ansible.mcp.run_tool|Call a specific tool on an MCP server
 ansible.mcp.server_info|Retrieve MCP server information
 ansible.mcp.tools_info|Retrieve a list of supported tools from an MCP server
+
+**Note**: All modules require the `ansible.mcp.mcp` connection plugin to be configured.
 
 <!--end collection content-->
 
