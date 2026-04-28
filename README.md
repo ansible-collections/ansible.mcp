@@ -1,6 +1,6 @@
 # Ansible MCP Collection
 
-The Ansible MCP collection includes a variety of Ansible content to help automate interactions with Model Context Protocol (MCP) servers. This collection is maintained by the Ansible Cloud Content team.
+This collection includes a variety of Ansible content to help automate interactions with Model Context Protocol (MCP) servers. This collection is maintained by the Ansible Cloud Content team.
 
 ## Contents
 
@@ -16,7 +16,7 @@ The Ansible MCP collection includes a variety of Ansible content to help automat
 
 ## Description
 
-This collection enables Ansible users to interact with [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) servers through automation. MCP is a standardized protocol for communication between AI systems and external tools or data sources. 
+This collection enables Ansible users to interact with [MCP](https://modelcontextprotocol.io/) servers through automation. MCP is a standardized protocol for communication between AI systems and external tools or data sources. 
 
 The collection provides modules to query server information, discover available tools, and execute tool calls on MCP servers within Ansible playbooks and Execution Environments.
 
@@ -27,7 +27,7 @@ The collection provides modules to query server information, discover available 
 
 ### Ansible version compatibility
 
-The collection supports ansible-core versions based on `requires_ansible` in [meta/runtime.yml](meta/runtime.yml):
+The collection supports ansible-core versions based on the `requires_ansible` value in [meta/runtime.yml](meta/runtime.yml):
 - Tested with ansible-core 2.16.0 and later, and the current development version of Ansible. Ansible Core versions prior to 2.16.0 are not supported.
 
 ### Python version compatibility
@@ -51,7 +51,7 @@ which requirements are needed.
 ### Connection Plugins
 Name | Description
 --- | ---
-ansible.mcp.mcp|Persistent connection to a Model Context Protocol (MCP) server
+ansible.mcp.mcp|Persistent connection to an MCP server
 
 ### Modules
 Name | Description
@@ -117,7 +117,7 @@ See the
 
 ## More information
 
-- [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
+- [MCP Documentation](https://modelcontextprotocol.io/)
 - [Ansible Collection overview](https://github.com/ansible-collections/overview)
 - [Ansible collection development forum](https://forum.ansible.com/c/project/collection-development/27)
 - [Ansible User guide](https://docs.ansible.com/ansible/devel/user_guide/index.html)
