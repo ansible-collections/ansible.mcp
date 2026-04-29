@@ -7,9 +7,8 @@ This collection includes a variety of Ansible content to help automate interacti
 - [Ansible MCP Collection](#ansible-mcp-collection)
   - [Contents](#contents)
   - [Description](#description)
-  - [Ansible version compatibility](#ansible-version-compatibility)
   - [Requirements](#requirements)
-    - [Ansible version compatibility](#ansible-version-compatibility-1)
+    - [Ansible version compatibility](#ansible-version-compatibility)
     - [Python version compatibility](#python-version-compatibility)
     - [Collection dependencies](#collection-dependencies)
     - [External requirements](#external-requirements)
@@ -28,16 +27,6 @@ This collection includes a variety of Ansible content to help automate interacti
 This collection enables Ansible users to interact with [MCP](https://modelcontextprotocol.io/) servers through automation. MCP is a standardized protocol for communication between AI systems and external tools or data sources.
 
 The collection provides modules to query server information, discover available tools, and execute tool calls on MCP servers within Ansible playbooks and Execution Environments.
-
-<!--start requires_ansible-->
-## Ansible version compatibility
-
-This collection has been tested against the following Ansible versions: **>=2.16.0**.
-
-Plugins and modules within a collection may be tested with only specific Ansible versions.
-A collection may contain metadata that identifies these versions.
-PEP440 is the schema used to describe the versions of Ansible.
-<!--end requires_ansible-->
 
 ## Requirements
 
