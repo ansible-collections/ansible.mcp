@@ -13,7 +13,7 @@ This collection includes a variety of Ansible content to help automate interacti
     - [Collection dependencies](#collection-dependencies)
     - [External requirements](#external-requirements)
   - [Included content](#included-content)
-    - [Connection plugins](#connection-plugins)
+    - [Connection Plugins](#connection-plugins)
     - [Modules](#modules)
   - [Testing](#testing)
   - [Installation](#installation)
@@ -53,7 +53,7 @@ which requirements are needed.
 ## Included content
 
 <!--start collection content-->
-### Connection plugins
+### Connection Plugins
 Name | Description
 --- | ---
 [ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst)|Persistent connection to an Model Context Protocol (MCP) server
