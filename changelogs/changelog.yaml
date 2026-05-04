@@ -1,3 +1,24 @@
----
 ancestor: null
-releases: {}
+releases:
+  1.0.0:
+    changes:
+      release_summary: This is the first release of the ``ansible.mcp`` collection,
+          providing plugins and playbooks for Model Context Protocol (MCP) integration.
+    fragments:
+      - release_summary.yml
+    modules:
+      - description: Call a specific tool on an MCP server
+        name: run_tool
+        namespace: ''
+      - description: Retrieve MCP server information
+        name: server_info
+        namespace: ''
+      - description: Retrieve a list of supported tools from an MCP server
+        name: tools_info
+        namespace: ''
+    plugins:
+      connection:
+        - description: Persistent connection to an Model Context Protocol (MCP) server
+          name: mcp
+          namespace: null
+    release_date: '2025-12-11'

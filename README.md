@@ -4,24 +4,29 @@ This collection includes a variety of Ansible content to help automate interacti
 
 ## Contents
 
-- [Description](#description)
-- [Requirements](#requirements)
-- [Included content](#included-content)
-- [Testing](#testing)
-- [Installation](#installation)
-- [Support](#support)
-- [Release notes](#release-notes)
-- [More information](#more-information)
-- [License Information](#license-information)
+- [Ansible MCP Collection](#ansible-mcp-collection)
+  - [Contents](#contents)
+  - [Description](#description)
+  - [Requirements](#requirements)
+    - [Ansible version compatibility](#ansible-version-compatibility)
+    - [Python version compatibility](#python-version-compatibility)
+    - [Collection dependencies](#collection-dependencies)
+    - [External requirements](#external-requirements)
+  - [Included content](#included-content)
+    - [Connection Plugins](#connection-plugins)
+    - [Modules](#modules)
+  - [Testing](#testing)
+  - [Installation](#installation)
+  - [Support](#support)
+  - [Release notes](#release-notes)
+  - [More information](#more-information)
+  - [License Information](#license-information)
 
 ## Description
 
-This collection enables Ansible users to interact with [MCP](https://modelcontextprotocol.io/) servers through automation. MCP is a standardized protocol for communication between AI systems and external tools or data sources. 
+This collection enables Ansible users to interact with [MCP](https://modelcontextprotocol.io/) servers through automation. MCP is a standardized protocol for communication between AI systems and external tools or data sources.
 
 The collection provides modules to query server information, discover available tools, and execute tool calls on MCP servers within Ansible playbooks and Execution Environments.
-
-<!--start requires_ansible-->
-<!--end requires_ansible-->
 
 ## Requirements
 
@@ -51,16 +56,14 @@ which requirements are needed.
 ### Connection Plugins
 Name | Description
 --- | ---
-ansible.mcp.mcp|Persistent connection to an MCP server
+[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst)|Persistent connection to an Model Context Protocol (MCP) server
 
 ### Modules
 Name | Description
 --- | ---
-ansible.mcp.run_tool|Call a specific tool on an MCP server
-ansible.mcp.server_info|Retrieve MCP server information
-ansible.mcp.tools_info|Retrieve a list of supported tools from an MCP server
-
-**Note**: All modules require the `ansible.mcp.mcp` connection plugin to be configured.
+[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.run_tool_module.rst)|Call a specific tool on an MCP server
+[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.server_info_module.rst)|Retrieve MCP server information
+[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.tools_info_module.rst)|Retrieve a list of supported tools from an MCP server
 
 <!--end collection content-->
 
