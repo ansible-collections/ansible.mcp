@@ -30,10 +30,15 @@ The collection provides modules to query server information, discover available 
 
 ## Requirements
 
-### Ansible version compatibility
+<!--start requires_ansible-->
+## Ansible version compatibility
 
-The collection supports ansible-core versions based on the `requires_ansible` value in [meta/runtime.yml](meta/runtime.yml):
-- Tested with ansible-core 2.16.0 and later, and the current development version of Ansible. Ansible Core versions prior to 2.16.0 are not supported.
+This collection has been tested against the following Ansible versions: **>=2.16.0**.
+
+Plugins and modules within a collection may be tested with only specific Ansible versions.
+A collection may contain metadata that identifies these versions.
+PEP440 is the schema used to describe the versions of Ansible.
+<!--end requires_ansible-->
 
 ### Python version compatibility
 
@@ -53,25 +58,23 @@ which requirements are needed.
 ## Included content
 
 <!--start collection content-->
-### Connection Plugins
+### Connection plugins
 Name | Description
 --- | ---
-ansible.mcp.mcp|Persistent connection to an MCP server
+[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.mcp_connection.rst)|Persistent connection to an Model Context Protocol (MCP) server
 
 ### Modules
 Name | Description
 --- | ---
-ansible.mcp.run_tool|Call a specific tool on an MCP server
-ansible.mcp.server_info|Retrieve MCP server information
-ansible.mcp.tools_info|Retrieve a list of supported tools from an MCP server
-
-**Note**: All modules require the `ansible.mcp.mcp` connection plugin to be configured.
+[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.run_tool_module.rst)|Call a specific tool on an MCP server
+[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.server_info_module.rst)|Retrieve MCP server information
+[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/docs/ansible.mcp.tools_info_module.rst)|Retrieve a list of supported tools from an MCP server
 
 <!--end collection content-->
 
 ## Testing
 
-This collection is tested using GitHub Actions. To learn more about testing, refer to [CI.md](https://github.com/ansible-collections/ansible.mcp/blob/main/CI.md).
+This collection is tested using GitHub Actions. To learn more about testing, refer to [CI.md](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/CI.md).
 
 ## Installation
 
@@ -137,3 +140,4 @@ See the
 GNU General Public License v3.0 or later.
 
 See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
+
