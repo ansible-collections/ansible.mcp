@@ -4,7 +4,8 @@
 
   vars:
     ansible_mcp_hosts: ['github', 'aws']
-    aws_mcp_server_args: ['--readonly']
+    # Commented out because it makes the AWS MCP server to hang indefinitely
+    # aws_mcp_server_args: ['--readonly']
     ansible_mcp_inventory_file_path: "{{ playbook_dir }}/inventory.yml"
 
   roles:
