@@ -3,7 +3,7 @@ releases:
   1.0.0:
     changes:
       release_summary: This is the first release of the ``ansible.mcp`` collection,
-          providing plugins and playbooks for Model Context Protocol (MCP) integration.
+        providing plugins and playbooks for Model Context Protocol (MCP) integration.
     fragments:
       - release_summary.yml
     modules:
@@ -22,3 +22,22 @@ releases:
           name: mcp
           namespace: null
     release_date: '2025-12-11'
+  1.1.0:
+    changes:
+      minor_changes:
+        - extensions/audit/event_query.yml - Added JQ query support for auditing MCP
+          server events via indirect Node Query Count (https://github.com/ansible-collections/ansible.mcp/pull/36).
+        - playbook/aws_ccapi_demo_validation_failure - A playbook to showcase client-side
+          validation failure with AWS CCAPI server (https://github.com/ansible-collections/ansible.mcp/pull/30).
+        - run_tool - Adds support for server_name and tool_name for node count query
+          support and updates integration tests and relevant documentation (https://github.com/ansible-collections/ansible.mcp/pull/38).
+        - tools_info - Enhanced the action plugin to return the ``server_name`` metadata
+          provided by the MCP server (https://github.com/ansible-collections/ansible.mcp/pull/36).
+      release_summary: This minor release adds new features and improvements to the
+        ``run_tool``, ``tools_info`` module(s).
+    fragments:
+      - 1.1.0.yml
+      - 2025-12-13-aws_ccaapi_demo_validation_failure.yml
+      - 2026-03-16-node_count_variables.yml
+      - 2026-05-16-event_query.yml
+    release_date: '2026-05-04'
