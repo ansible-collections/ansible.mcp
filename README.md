@@ -74,7 +74,7 @@ Name | Description
 
 ## Testing
 
-This collection is tested using GitHub Actions. To learn more about testing, refer to [CI.md](https://github.com/ansible-collections/ansible.mcp/blob/stable-1/CI.md).
+This collection is tested using GitHub Actions. To learn more about testing, refer to [CI.md](https://github.com/ansible-collections/ansible.mcp/blob/main/CI.md).
 
 ## Installation
 
