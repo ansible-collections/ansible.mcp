@@ -76,8 +76,6 @@ Name | Description
 
 This collection is tested using GitHub Actions. To learn more about testing, refer to [CI.md](https://github.com/ansible-collections/ansible.mcp/blob/main/CI.md).
 
-SonarQube Cloud (static analysis) is documented in [sonarcloud.md](https://github.com/ansible-collections/ansible.mcp/blob/main/sonarcloud.md).
-
 ## Installation
 
 ```bash
