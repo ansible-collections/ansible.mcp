@@ -1,0 +1,42 @@
+---
+# SonarCloud analysis for ansible.mcp
+#
+# Phase 1: static analysis only. Code coverage (coverage.xml) and any workflow_run /
+# artifact wiring will be added in a separate PR per configure-sonarcloud-coverage.
+#
+# Uses the same-repo + default-branch push model: GitHub does not expose org secrets to workflows
+# from fork PRs (see https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
+# This job is gated so the Sonar token is never available in untrusted fork contexts.
+name: SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+      - stable-*
+  pull_request:
+    branches:
+      - main
+      - stable-*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  sonarqube:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        # Same pinned version as ansible-collections/kubernetes.core sonarcloud.yml
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9
+        env:
+          SONAR_TOKEN: ${{ secrets.ANSIBLE_COLLECTIONS_ORG_SONAR_TOKEN_CICD_BOT }}
