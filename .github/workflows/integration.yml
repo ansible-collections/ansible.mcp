@@ -19,7 +19,7 @@ jobs:
     environment: protected # requires manual approval within GitHub Actions to proceed
     env:
       source: "./source"
-      python_version: "3.12"
+      python_version: "3.13"
       ansible_version: "devel"
     runs-on: ubuntu-latest
     name: "ansible-test-integration"
