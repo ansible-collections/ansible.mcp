@@ -1,0 +1,4 @@
+# Installed by ansible-test into the unit test container.
+pytest-ansible
+pytest-xdist
+ansible-compat
