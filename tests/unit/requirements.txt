@@ -1,4 +1,5 @@
 # Installed by ansible-test into the unit test container.
-pytest-ansible
+# Do not install pytest-ansible or ansible-compat here; they override
+# ANSIBLE_COLLECTIONS_PATH and break ansible-test's ansible_pytest_collections plugin.
+# Tox/ADE unit tests use test-requirements.txt instead (see test-requirements.txt).
 pytest-xdist
-ansible-compat

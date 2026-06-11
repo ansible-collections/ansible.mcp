@@ -74,7 +74,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ANSIBLE_CORE_REF: "stable-2.20"
-      ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
