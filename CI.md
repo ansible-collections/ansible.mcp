@@ -16,7 +16,7 @@ The following tests run on every pull request:
 | [Unit tests](.github/workflows/tests.yml) | Executes unit test cases | 3.10-3.14 (varies by ansible-core) | 2.16, 2.17, 2.18, 2.19, 2.20, devel, milestone |
 | [Ansible-lint](.github/workflows/tests.yml) | Runs ansible-lint validation | Latest | devel |
 | [Build-import](.github/workflows/tests.yml) | Validates collection build and import | Latest | devel |
-| [Integration](.github/workflows/integration.yml) | Runs integration tests (requires manual approval via protected environment) | 3.12 | devel |
+| [Integration](.github/workflows/integration.yml) | Runs integration tests (requires manual approval via protected environment) | 3.13 | devel |
 
 ### Python Version Compatibility by ansible-core Version
 
