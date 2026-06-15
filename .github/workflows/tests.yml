@@ -105,7 +105,7 @@ jobs:
       
       - name: Run unit tests with coverage
         working-directory: ansible_collections/ansible/mcp
-        run: ansible-test units --venv --coverage --python 3.12
+        run: ansible-test units --venv --coverage --python 3.12 --requirements
 
       - name: Combine and emit coverage XML
         working-directory: ansible_collections/ansible/mcp
@@ -156,17 +156,3 @@ jobs:
           '${{ needs.build-import.result }}',
           '${{ needs.coverage.result }}'
           ])"
-
-  sonarcloud:
-    name: SonarCloud scan
-    needs:
-      - all_green
-      - coverage
-    if: >-
-      ${{ needs.all_green.result == 'success'
-      && (github.event_name == 'push'
-      || (github.event_name == 'pull_request'
-      && github.event.pull_request.head.repo.full_name == github.repository)) }}
-    uses: ./.github/workflows/sonarcloud.yml
-    secrets:
-      ANSIBLE_COLLECTIONS_ORG_SONAR_TOKEN_CICD_BOT: ${{ secrets.ANSIBLE_COLLECTIONS_ORG_SONAR_TOKEN_CICD_BOT }}
