@@ -12,10 +12,13 @@ The following tests run on every pull request:
 | --- | ----------- | --------------- | --------------------- |
 | [Changelog](.github/workflows/changelog.yml) | Checks for the presence of changelog fragments | 3.12 | devel |
 | [Linters](.github/workflows/linters.yml) | Runs `black`, `flake8`, `isort`, `mypy`, and `yamllint` on plugins and tests | 3.12 | devel |
+| [all_green](.github/workflows/tests.yml) | Aggregates CI jobs and gates merge readiness (`name: all_green`) | — | — |
 | [Sanity](.github/workflows/tests.yml) | Runs ansible sanity checks | 3.10-3.14 (varies by ansible-core) | 2.16, 2.17, 2.18, 2.19, 2.20, devel, milestone |
 | [Unit tests](.github/workflows/tests.yml) | Executes unit test cases | 3.10-3.14 (varies by ansible-core) | 2.16, 2.17, 2.18, 2.19, 2.20, devel, milestone |
+| [Unit test coverage](.github/workflows/tests.yml) | Runs `ansible-test units --coverage` and uploads `coverage.xml` for SonarCloud | 3.12 | stable-2.20 |
 | [Ansible-lint](.github/workflows/tests.yml) | Runs ansible-lint validation | Latest | devel |
 | [Build-import](.github/workflows/tests.yml) | Validates collection build and import | Latest | devel |
+| [SonarCloud](.github/workflows/sonarcloud.yml) | Analysis with coverage after `all_green` succeeds (`workflow_run`) | — | — |
 | [Integration](.github/workflows/integration.yml) | Runs integration tests (requires manual approval via protected environment) | 3.13 | devel |
 
 ### Python Version Compatibility by ansible-core Version

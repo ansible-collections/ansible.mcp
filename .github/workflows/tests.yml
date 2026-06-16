@@ -1,12 +1,16 @@
 ---
-name: "CI"
+name: all_green
 
 concurrency:
-  group: ${{ github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 on: # yamllint disable-line rule:truthy
   pull_request:
+    branches:
+      - main
+      - stable-*
+  push:
     branches:
       - main
       - stable-*
@@ -65,6 +69,74 @@ jobs:
               "python": "3.12"
             }
           ]
+  coverage:
+    name: Unit test coverage
+    runs-on: ubuntu-latest
+    env:
+      ANSIBLE_CORE_REF: "stable-2.20"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # ansible-test requires cwd under .../ansible_collections/{namespace}/{name}/
+          path: ansible_collections/ansible/mcp
+
+      - name: Checkout ansible.utils dependency
+        uses: ansible-network/github_actions/.github/actions/checkout_dependency@47822b51aee957080e811cc434443c4e3bb9569a
+        with:
+          repository: ansible-collections/ansible.utils
+          path: ansible_collections/ansible/utils
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible (ansible-test)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "https://github.com/ansible/ansible/archive/${ANSIBLE_CORE_REF}.tar.gz"
+
+  
+      - name: Install required Python dependencies 
+        run: |
+          python -m pip install -r ansible_collections/ansible/mcp/test-requirements.txt
+      
+      - name: Run unit tests with coverage
+        working-directory: ansible_collections/ansible/mcp
+        run: ansible-test units --venv --coverage --python 3.12 --requirements
+
+      - name: Combine and emit coverage XML
+        working-directory: ansible_collections/ansible/mcp
+        run: |
+          ansible-test coverage combine --venv --python 3.12 --requirements
+          ansible-test coverage xml --venv --python 3.12 --requirements
+
+      - name: Prepare coverage.xml for SonarCloud
+        env:
+          COLLECTION_DIR: ${{ github.workspace }}/ansible_collections/ansible/mcp
+        run: |
+          set -euo pipefail
+          xml=$(find "${COLLECTION_DIR}/tests/output/reports" -maxdepth 1 -name '*.xml' ! -name '*powershell*' | head -1)
+          if [[ -z "${xml}" ]]; then
+            echo "::error::coverage XML not found under tests/output/reports"
+            exit 1
+          fi
+          cp "${xml}" "${GITHUB_WORKSPACE}/coverage.xml"
+          sed -i "s#${GITHUB_WORKSPACE}/##g" "${GITHUB_WORKSPACE}/coverage.xml"
+          sed -i 's#ansible_collections/ansible/mcp/##g' "${GITHUB_WORKSPACE}/coverage.xml"
+          if ! grep -q '<coverage' "${GITHUB_WORKSPACE}/coverage.xml"; then
+            echo "::error::coverage.xml does not look like Cobertura XML"
+            exit 1
+          fi
+          test -s "${GITHUB_WORKSPACE}/coverage.xml"
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ${{ github.workspace }}/coverage.xml
   all_green:
     if: ${{ always() }}
     needs:
@@ -72,6 +144,7 @@ jobs:
       - sanity
       - unit-galaxy
       - ansible-lint
+      - coverage
     runs-on: ubuntu-latest
     steps:
       - run: >-
@@ -80,5 +153,6 @@ jobs:
           '${{ needs.sanity.result }}',
           '${{ needs.unit-galaxy.result }}',
           '${{ needs.ansible-lint.result }}',
-          '${{ needs.build-import.result }}'
+          '${{ needs.build-import.result }}',
+          '${{ needs.coverage.result }}'
           ])"

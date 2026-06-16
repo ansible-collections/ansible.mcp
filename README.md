@@ -1,3 +1,11 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ansible-collections_ansible.mcp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ansible-collections_ansible.mcp)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ansible-collections_ansible.mcp&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ansible-collections_ansible.mcp)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ansible-collections_ansible.mcp&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ansible-collections_ansible.mcp)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ansible-collections_ansible.mcp&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ansible-collections_ansible.mcp)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ansible-collections_ansible.mcp&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ansible-collections_ansible.mcp)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ansible-collections_ansible.mcp&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ansible-collections_ansible.mcp)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ansible-collections_ansible.mcp&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ansible-collections_ansible.mcp)
+
 # Ansible MCP Collection
 
 This collection includes a variety of Ansible content to help automate interactions with Model Context Protocol (MCP) servers. This collection is maintained by the Ansible Cloud Content team.
