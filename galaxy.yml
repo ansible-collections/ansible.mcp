@@ -32,6 +32,22 @@ issues: https://github.com/ansible-collections/ansible.mcp/issues
 build_ignore:
   - .gitignore
   - changelogs/.plugin-cache.yaml
+  - .ansible-lint
+  - codecov.yml
+  - .devcontainer
+  - devfile.yaml
+  - .github
+  - .isort.cfg
+  - .pre-commit-config.yaml
+  - .prettierignore
+  - pyproject.toml
+  - run_unit_tests.sh
+  - sonar-project.properties
+  - SONARCLOUD.md
+  - test-requirements.txt
+  - tox-ansible.ini
+  - tox.ini
+  - .vscode
 # A dict controlling use of manifest directives used in building the collection artifact. The key 'directives' is a
 # list of MANIFEST.in style
 # L(directives,https://packaging.python.org/en/latest/guides/using-manifest-in/#manifest-in-commands). The key
