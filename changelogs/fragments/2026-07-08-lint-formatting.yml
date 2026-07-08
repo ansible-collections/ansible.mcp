@@ -1,2 +1,2 @@
 minor_changes:
-  - playbooks - Fix Jinja spacing issues and address minor YAML formatting inconsistencies.
+  - playbooks - Fix Jinja spacing issues and address minor YAML formatting inconsistencies (https://github.com/ansible-collections/ansible.mcp/pull/65).
