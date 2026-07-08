@@ -55,6 +55,7 @@ This collection requires Python 3.10 or greater.
 ### Collection dependencies
 
 This collection depends on the following collections:
+
 - `ansible.utils`
 
 ### External requirements
@@ -67,16 +68,18 @@ which requirements are needed.
 
 <!--start collection content-->
 ### Connection plugins
-Name | Description
---- | ---
-[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst)|Persistent connection to an Model Context Protocol (MCP) server
+
+Name                                           | Description
+---------------------------------------------- | -----------------------------------------------
+[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst) | Persistent connection to an Model Context Protocol (MCP) server
 
 ### Modules
-Name | Description
---- | ---
-[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.run_tool_module.rst)|Call a specific tool on an MCP server
-[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.server_info_module.rst)|Retrieve MCP server information
-[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.tools_info_module.rst)|Retrieve a list of supported tools from an MCP server
+
+Name                                           | Description
+---------------------------------------------- | -----------------------------------------------
+[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.run_tool_module.rst)     | Call a specific tool on an MCP server
+[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.server_info_module.rst) | Retrieve MCP server information
+[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.tools_info_module.rst)  | Retrieve a list of supported tools from an MCP server
 
 <!--end collection content-->
 
@@ -153,4 +156,3 @@ See the
 GNU General Public License v3.0 or later.
 
 See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
-
