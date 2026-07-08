@@ -120,10 +120,15 @@ for more details.
 
 ## Support
 
-For support and questions about this collection:
+This collection is maintained by Red Hat.
+
+As Red Hat Ansible Certified Content, this collection is entitled to support through Ansible Automation Platform (AAP) using the **Create issue** button on the top right corner.
+If a support case cannot be opened with Red Hat and the collection has been obtained either from Galaxy or GitHub, there may be community
+help available on the [Ansible Forum](https://forum.ansible.com/).
+
+For additional support and questions about this collection, please see:
 
 - **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/ansible-collections/ansible.mcp/issues)
-- **Community Help**: Available on the [Ansible Forum](https://forum.ansible.com/)
 - **Discussions**: Join the [Ansible collection development forum](https://forum.ansible.com/c/project/collection-development/27)
 
 ## Release notes
