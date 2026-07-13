@@ -71,7 +71,7 @@ which requirements are needed.
 
 Name                                           | Description
 ---------------------------------------------- | -----------------------------------------------
-[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst) | Persistent connection to an Model Context Protocol (MCP) server
+[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst) | Persistent connection to a Model Context Protocol (MCP) server
 
 ### Modules
 
