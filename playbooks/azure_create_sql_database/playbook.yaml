@@ -16,7 +16,7 @@
         name: sql
         args:
           command: sql_server_create
-          intent: 'create sql server instance'
+          intent: "create sql server instance"
           parameters:
             resource-group: "{{ azure_resource_group }}"
             subscription: "{{ azure_subscription }}"

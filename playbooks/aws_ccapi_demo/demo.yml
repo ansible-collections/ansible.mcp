@@ -24,7 +24,7 @@
     subnet_resource:
       name: subnet
       type: "AWS::EC2::Subnet"
-      properties: {}  # we will fill dynamically after VPC creation
+      properties: {} # we will fill dynamically after VPC creation
 
     ec2_resource:
       name: ec2

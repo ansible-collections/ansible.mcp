@@ -40,7 +40,7 @@
         args:
           branch: "{{ github_branch_name }}"
           content: "{{ file_content }}"
-          message: 'File pushed using ansible.mcp collection'
+          message: "File pushed using ansible.mcp collection"
           owner: "{{ github_organization | default(github_owner) }}"
           repo: "{{ github_repository_name }}"
           path: "{{ file_path }}"
