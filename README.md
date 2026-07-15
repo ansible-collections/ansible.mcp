@@ -55,6 +55,7 @@ This collection requires Python 3.10 or greater.
 ### Collection dependencies
 
 This collection depends on the following collections:
+
 - `ansible.utils`
 
 ### External requirements
@@ -67,16 +68,18 @@ which requirements are needed.
 
 <!--start collection content-->
 ### Connection plugins
-Name | Description
---- | ---
-[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst)|Persistent connection to an Model Context Protocol (MCP) server
+
+Name                                           | Description
+---------------------------------------------- | -----------------------------------------------
+[ansible.mcp.mcp](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.mcp_connection.rst) | Persistent connection to a Model Context Protocol (MCP) server
 
 ### Modules
-Name | Description
---- | ---
-[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.run_tool_module.rst)|Call a specific tool on an MCP server
-[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.server_info_module.rst)|Retrieve MCP server information
-[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.tools_info_module.rst)|Retrieve a list of supported tools from an MCP server
+
+Name                                           | Description
+---------------------------------------------- | -----------------------------------------------
+[ansible.mcp.run_tool](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.run_tool_module.rst)     | Call a specific tool on an MCP server
+[ansible.mcp.server_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.server_info_module.rst) | Retrieve MCP server information
+[ansible.mcp.tools_info](https://github.com/ansible-collections/ansible.mcp/blob/main/docs/ansible.mcp.tools_info_module.rst)  | Retrieve a list of supported tools from an MCP server
 
 <!--end collection content-->
 
@@ -120,10 +123,15 @@ for more details.
 
 ## Support
 
-For support and questions about this collection:
+This collection is maintained by Red Hat.
+
+As Red Hat Ansible Certified Content, this collection is entitled to support through Ansible Automation Platform (AAP) using the **Create issue** button on the top right corner.
+If a support case cannot be opened with Red Hat and the collection has been obtained either from Galaxy or GitHub, there may be community
+help available on the [Ansible Forum](https://forum.ansible.com/).
+
+For additional support and questions about this collection, please see:
 
 - **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/ansible-collections/ansible.mcp/issues)
-- **Community Help**: Available on the [Ansible Forum](https://forum.ansible.com/)
 - **Discussions**: Join the [Ansible collection development forum](https://forum.ansible.com/c/project/collection-development/27)
 
 ## Release notes
@@ -148,4 +156,3 @@ See the
 GNU General Public License v3.0 or later.
 
 See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
-
