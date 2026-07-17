@@ -1,0 +1,4 @@
+---
+security_fixes:
+  - Require the Azure SQL example password through an environment variable and redact the task that consumes it.
+  - Skip the secret-bearing SonarCloud scan for pull requests originating from forks.
