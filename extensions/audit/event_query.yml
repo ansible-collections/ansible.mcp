@@ -4,6 +4,7 @@ ansible.mcp.run_tool:
     select(.server_name != null and .tool_name != null)
     | select(.tool_classification.read_only != true)
     | {
+        name: (.server_name + ":" + .tool_name),
         canonical_facts: {
           server_name: .server_name,
           tool_name: .tool_name
@@ -19,8 +20,9 @@ ansible.mcp.server_info:
     .server_info
     | select(.serverInfo.name != null)
     | {
+        name: .serverInfo.name,
         canonical_facts: {
-          server_name: .serverInfo.name,
+          server_name: .serverInfo.name
         },
         facts: {
           device_type: "server",
@@ -33,6 +35,7 @@ ansible.mcp.tools_info:
     .server_name as $sn | .tools[]
     | select(.name != null)
     | {
+        name: (($sn // "UNKNOWN") + ":" + .name),
         canonical_facts: {
           server_name: $sn,
           tool_name: .name
