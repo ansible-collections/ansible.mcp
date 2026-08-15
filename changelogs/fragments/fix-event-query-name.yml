@@ -1,0 +1,9 @@
+bugfixes:
+  - extensions/audit/event_query.yml - Add a top-level ``name`` to every record
+    emitted by the ``run_tool``, ``server_info`` and ``tools_info`` JQ queries.
+    The controller stores each record in the ``main_indirectmanagednodeaudit``
+    table whose ``name`` column is ``NOT NULL``; records without a top-level
+    ``name`` raised an ``IntegrityError`` that aborted the whole job's
+    ``bulk_create``, silently dropping every indirect-node audit entry for the
+    job (including billable mutating MCP tool calls) while the job still
+    reported success.
