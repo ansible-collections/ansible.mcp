@@ -2,5 +2,12 @@
 profile: production
 
 exclude_paths:
-  - .github/
+  - changelogs
+  - docs
   - tests/integration
+  - tests/unit
+  - .ansible
+  - .github
+
+warn_list:
+  - no-log-password
