@@ -59,7 +59,7 @@
         - name: Set security_scan_token for {{ resource_item.name }}
           ansible.builtin.set_fact:
             security_scan_token: >-
-              {{ (tmp_scan.content[0].text | from_json).get('security_scan_token', '')}}
+              {{ (tmp_scan.content[0].text | from_json).get('security_scan_token', '') }}
 
         - name: Explain security findings for {{ resource_item.name }}
           ansible.mcp.run_tool:
@@ -108,7 +108,7 @@
       retries: 40
       delay: 5
       vars:
-        request_token: "{{ tmp_result.content[0].text | from_json}}"
+        request_token: "{{ tmp_result.content[0].text | from_json }}"
 
     - name: Fail if creation failed
       ansible.builtin.fail:
