@@ -29,6 +29,8 @@ jobs:
         with:
           path: ${{ env.source }}
           ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true
+          persist-credentials: false   
 
       - name: Build and install collection
         id: install-collection
