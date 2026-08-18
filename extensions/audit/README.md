@@ -48,6 +48,7 @@ In practical terms, for this collection:
 
 Every emitted object has:
 
+- **`name`**: a non-null top-level label for the record (see per-module rules below). This is **required**: the controller stores each record in the `main_indirectmanagednodeaudit` table, whose `name` column is `NOT NULL`. A record without a top-level `name` raises an `IntegrityError` that aborts the job's entire `bulk_create`, silently dropping **every** indirect-node audit entry for that job (including billable mutating tool calls) while the job still reports success.
 - **`canonical_facts`**: correlation identifiers (see per-module rules below).
 - **`facts`**: always includes `device_type` and `infra_bucket: "mcp"`.
 
@@ -57,6 +58,7 @@ Every emitted object has:
 |------|----------------|
 | Filter | `select(.server_name != null and .tool_name != null)` on the module result root. |
 | Classification filter | `select(.tool_classification.read_only != true)` -- only mutating tool calls produce audit events. |
+| `name` | `server_name + ":" + tool_name` (e.g. `github:create_issue`). |
 | `canonical_facts` | `server_name`, `tool_name`. |
 | `facts` | `device_type: "resource"`, `infra_bucket: "mcp"`. |
 
@@ -81,6 +83,7 @@ The classification logic lives in `plugins/plugin_utils/tool_classification.py` 
 |------|----------------|
 | Input | `.server_info`. |
 | Filter | `select(.serverInfo.name != null)`. |
+| `name` | `.serverInfo.name`. |
 | `canonical_facts` | `server_name` from `.serverInfo.name` only (no `tool_name`). |
 | `facts` | `device_type: "server"`, `infra_bucket: "mcp"`. |
 
@@ -90,6 +93,7 @@ The classification logic lives in `plugins/plugin_utils/tool_classification.py` 
 |------|----------------|
 | Input | Binds top-level `.server_name` as `$sn`, then iterates `.tools[]`. |
 | Filter | `select(.name != null)` per element. |
+| `name` | `($sn // "UNKNOWN") + ":" + .name` (e.g. `github:list_issues`); falls back to `UNKNOWN:` when `server_name` is absent. |
 | `canonical_facts` | `server_name: $sn`, `tool_name: .name` -- one event per tool. |
 | `facts` | `device_type: "tool"`, `infra_bucket: "mcp"`. |
 
