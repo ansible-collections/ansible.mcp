@@ -25,7 +25,7 @@ jobs:
     name: "ansible-test-integration"
     steps:
       - name: Checkout collection
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: ${{ env.source }}
           ref: ${{ github.event.pull_request.head.sha }}
@@ -34,15 +34,15 @@ jobs:
 
       - name: Build and install collection
         id: install-collection
-        uses: ansible-network/github_actions/.github/actions/build_install_collection@main
+        uses: ansible-network/github_actions/.github/actions/build_install_collection@main # pinned to main because this repo has no tags or releases
         with:
           install_python_dependencies: false
           source_path: ${{ env.source }}
 
-      - uses: ansible/ansible-test-auth@v1
+      - uses: ansible/ansible-test-auth@008750a5bf07124c3ab86d30d73d7319d7518f36 # v1.0.0
 
       - name: Create integration config file
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
             GH_PAT_SECRET: ${{ secrets.ANSIBLE_MCP_GITHUB_PAT }}
             INTEGRATION_CONFIG_PATH: "${{ steps.install-collection.outputs.collection_path }}/tests/integration/integration_config.yml"
@@ -68,7 +68,7 @@ jobs:
         shell: bash
 
       - name: Run integration tests
-        uses: ansible-network/github_actions/.github/actions/ansible_test_integration@main
+        uses: ansible-network/github_actions/.github/actions/ansible_test_integration@main # pinned to main because this repo has no tags or releases
         with:
           collection_path: ${{ steps.install-collection.outputs.collection_path }}
           python_version: ${{ env.python_version }}
