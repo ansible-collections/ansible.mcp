@@ -15,13 +15,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Add 'needs_triage' label if the pr is not a draft
-        uses: actions-ecosystem/action-add-labels@v1
+        uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
         if: github.event.pull_request.draft == false
         with:
           labels: needs_triage
 
       - name: Remove 'needs_triage' label if the pr is a draft
-        uses: actions-ecosystem/action-remove-labels@v1
+        uses: actions-ecosystem/action-remove-labels@f5dccab59b9ed79c1a5ddd2ab6d8771449b0250f # v1.3.0
         if: github.event.pull_request.draft == true
         with:
           labels: needs_triage

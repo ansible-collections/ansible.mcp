@@ -19,5 +19,5 @@ on: # yamllint disable-line rule:truthy
 
 jobs:
   changelog:
-    uses: ansible/ansible-content-actions/.github/workflows/changelog.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/changelog.yaml@7dc7e15a53c2ae8bd092461e53dafd6627e34ac6 # v1.1.0
     if: github.event_name == 'pull_request' && ! contains(github.event.pull_request.labels.*.name, 'skip-changelog')

@@ -16,10 +16,10 @@ jobs:
       # contents:read is required to checkout the repository source code
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@5fda3b95ab1ab11af4a32097e8eceadd7e51223b # v7.0.0
         with:
           python-version: 3.12
 

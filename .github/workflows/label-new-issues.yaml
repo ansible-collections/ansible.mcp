@@ -13,6 +13,6 @@ jobs:
       contents: write
       issues: write
     steps:
-      - uses: actions-ecosystem/action-add-labels@v1
+      - uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
         with:
           labels: needs_triage
