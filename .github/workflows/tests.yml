@@ -82,7 +82,7 @@ jobs:
           path: ansible_collections/ansible/mcp
 
       - name: Checkout ansible.utils dependency
-        uses: ansible-network/github_actions/.github/actions/checkout_dependency@main # pinned to main because this repo has no tags or releases
+        uses: ansible-network/github_actions/.github/actions/checkout_dependency@4678c74a7d712d55e663c88f66eec6d9c3642550 # main as of Aug 21, 2026
         with:
           repository: ansible-collections/ansible.utils
           path: ansible_collections/ansible/utils
