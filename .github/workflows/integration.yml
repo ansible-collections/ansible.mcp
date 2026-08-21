@@ -34,7 +34,7 @@ jobs:
 
       - name: Build and install collection
         id: install-collection
-        uses: ansible-network/github_actions/.github/actions/build_install_collection@main # pinned to main because this repo has no tags or releases
+        uses: ansible-network/github_actions/.github/actions/build_install_collection@4678c74a7d712d55e663c88f66eec6d9c3642550 # main as of Aug 21, 2026
         with:
           install_python_dependencies: false
           source_path: ${{ env.source }}
@@ -68,7 +68,7 @@ jobs:
         shell: bash
 
       - name: Run integration tests
-        uses: ansible-network/github_actions/.github/actions/ansible_test_integration@main # pinned to main because this repo has no tags or releases
+        uses: ansible-network/github_actions/.github/actions/ansible_test_integration@4678c74a7d712d55e663c88f66eec6d9c3642550 # main as of Aug 21, 2026
         with:
           collection_path: ${{ steps.install-collection.outputs.collection_path }}
           python_version: ${{ env.python_version }}
