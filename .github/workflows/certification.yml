@@ -8,8 +8,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: "0 6 * * *"
 
 concurrency:
   group: cert-ver-${{ github.head_ref || github.run_id }}
@@ -17,6 +15,6 @@ concurrency:
 
 jobs:
   call:
-    uses: ansible-collections/partner-certification-checker/.github/workflows/certification-reusable.yml@v4.1.0 # zizmor: ignore[unpinned-uses]
+    uses: ansible-collections/partner-certification-checker/.github/workflows/certification-reusable.yml@f4bf7ba4d3f008b2db8fc6a812fa3f89fdf42c2e #v4.1.0
     with:
       collection-deps: "ansible.utils"
