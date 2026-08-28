@@ -18,11 +18,11 @@ on: # yamllint disable-line rule:truthy
 
 jobs:
   build-import:
-    uses: ansible/ansible-content-actions/.github/workflows/build_import.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/build_import.yaml@7dc7e15a53c2ae8bd092461e53dafd6627e34ac6 # v1.1.0
   ansible-lint:
-    uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@7dc7e15a53c2ae8bd092461e53dafd6627e34ac6 # v1.1.0
   sanity:
-    uses: ansible/ansible-content-actions/.github/workflows/sanity.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/sanity.yaml@7dc7e15a53c2ae8bd092461e53dafd6627e34ac6 # v1.1.0
     with:
       extra_matrix_entries: >
         [
@@ -46,7 +46,7 @@ jobs:
           }
         ]
   unit-galaxy:
-    uses: ansible/ansible-content-actions/.github/workflows/unit.yaml@main
+    uses: ansible/ansible-content-actions/.github/workflows/unit.yaml@7dc7e15a53c2ae8bd092461e53dafd6627e34ac6 # v1.1.0
     with:
       extra_matrix_entries: >
           [
@@ -76,20 +76,20 @@ jobs:
       ANSIBLE_CORE_REF: "stable-2.20"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # ansible-test requires cwd under .../ansible_collections/{namespace}/{name}/
           path: ansible_collections/ansible/mcp
 
       - name: Checkout ansible.utils dependency
-        uses: ansible-network/github_actions/.github/actions/checkout_dependency@47822b51aee957080e811cc434443c4e3bb9569a
+        uses: ansible-network/github_actions/.github/actions/checkout_dependency@4678c74a7d712d55e663c88f66eec6d9c3642550 # main as of Aug 21, 2026
         with:
           repository: ansible-collections/ansible.utils
           path: ansible_collections/ansible/utils
           ref: main
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
 
@@ -133,7 +133,7 @@ jobs:
           test -s "${GITHUB_WORKSPACE}/coverage.xml"
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage
           path: ${{ github.workspace }}/coverage.xml
