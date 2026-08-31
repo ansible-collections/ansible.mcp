@@ -14,6 +14,8 @@ on:
       - main
       - stable-*
 
+permissions: {}
+
 jobs:
   integration:
     environment: protected # requires manual approval within GitHub Actions to proceed
@@ -23,6 +25,8 @@ jobs:
       ansible_version: "devel"
     runs-on: ubuntu-latest
     name: "ansible-test-integration"
+    permissions:
+      contents: read
     steps:
       - name: Checkout collection
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
