@@ -49,6 +49,7 @@
   ansible.builtin.assert:
     that:
       - mutating_node_data | length == 1
+      - mutating_node_data[0].name == "github-mcp-server:create_issue"
       - mutating_node_data[0].canonical_facts.server_name == "github-mcp-server"
       - mutating_node_data[0].canonical_facts.tool_name == "create_issue"
       - mutating_node_data[0].facts.device_type == "resource"
@@ -75,7 +76,8 @@
       Expected: {{ expected_server_info_result | to_nice_json }}
   vars:
     expected_server_info_result:
-      - canonical_facts:
+      - name: "github-mcp-server"
+        canonical_facts:
           server_name: "github-mcp-server"
         facts:
           device_type: "server"
@@ -99,6 +101,7 @@
       In: {{ transformed_tools | to_json }}
   vars:
     expected_tool:
+      name: "github-mcp-server:search_repositories"
       canonical_facts:
         server_name: "github-mcp-server"
         tool_name: "search_repositories"

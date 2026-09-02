@@ -47,7 +47,8 @@
       Expected: {{ expected_server_info_result | to_nice_json }}
   vars:
     expected_server_info_result:
-      - canonical_facts:
+      - name: "awslabs.iam-mcp-server"
+        canonical_facts:
           server_name: "awslabs.iam-mcp-server"
         facts:
           device_type: "server"
@@ -71,6 +72,7 @@
       In: {{ transformed_tools | to_json }}
   vars:
     expected_tool:
+      name: "awslabs.iam-mcp-server:list_groups"
       canonical_facts:
         server_name: "awslabs.iam-mcp-server"
         tool_name: "list_groups"
