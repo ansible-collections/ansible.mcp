@@ -6,4 +6,4 @@ bugfixes:
     ``name`` raised an ``IntegrityError`` that aborted the whole job's
     ``bulk_create``, silently dropping every indirect-node audit entry for the
     job (including billable mutating MCP tool calls) while the job still
-    reported success.
+    reported success (https://github.com/ansible-collections/ansible.mcp/pull/70).
