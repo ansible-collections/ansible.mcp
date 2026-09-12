@@ -37,7 +37,7 @@ ansible.mcp.tools_info:
     | {
         name: (($sn // "UNKNOWN") + ":" + .name),
         canonical_facts: {
-          server_name: $sn,
+          server_name: ($sn // "UNKNOWN"),
           tool_name: .name
         },
         facts: {
