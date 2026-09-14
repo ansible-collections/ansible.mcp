@@ -14,9 +14,14 @@
   ansible.builtin.assert:
     that:
       - github_node_data == expected_result
+    fail_msg: |
+      Transformation failed.
+      Result: {{ github_node_data | to_nice_json }}
+      Expected: {{ expected_result | to_nice_json }}
   vars:
     expected_result:
-      - canonical_facts:
+      - name: "github-mcp-server:search_repositories"
+        canonical_facts:
           server_name: "github-mcp-server"
           tool_name: "search_repositories"
         facts:
@@ -41,7 +46,8 @@
       Expected: {{ expected_server_info_result | to_nice_json }}
   vars:
     expected_server_info_result:
-      - canonical_facts:
+      - name: "github-mcp-server"
+        canonical_facts:
           server_name: "github-mcp-server"
         facts:
           device_type: "server"
@@ -65,6 +71,7 @@
       In: {{ transformed_tools | to_json }}
   vars:
     expected_tool:
+      name: "github-mcp-server:search_repositories"
       canonical_facts:
         server_name: "github-mcp-server"
         tool_name: "search_repositories"
