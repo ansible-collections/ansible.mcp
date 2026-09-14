@@ -40,6 +40,7 @@ change and cannot be skipped by path filtering.
 
 from __future__ import absolute_import, division, print_function
 
+
 __metaclass__ = type
 
 import os
@@ -48,13 +49,12 @@ import re
 import pytest
 import yaml
 
+
 # --------------------------------------------------------------------------
 # Locate the query file
 # --------------------------------------------------------------------------
 
-COLLECTION_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..")
-)
+COLLECTION_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 AUDIT_DIR = os.path.join(COLLECTION_ROOT, "extensions", "audit")
 QUERY_FILE = os.path.join(AUDIT_DIR, "event_query.yml")
 
@@ -64,19 +64,47 @@ TAXONOMY_KEYS = ("infra_type", "infra_bucket", "device_type")
 # Field names that change over the life of a node. Anything here inside
 # canonical_facts is an overcount: the same node is re-counted as a new one
 # every time the value changes. These belong in `facts`, which is not hashed.
-VOLATILE_KEYS = frozenset([
-    "status", "state", "tags", "hostname", "ip", "ipv4", "ipv6", "lanip",
-    "lan_ip", "mac", "management_ip", "managementip", "interface_ip",
-    "interfaceip", "address", "power_state", "powerstate", "role", "version",
-    "firmware",
-])
+VOLATILE_KEYS = frozenset(
+    [
+        "status",
+        "state",
+        "tags",
+        "hostname",
+        "ip",
+        "ipv4",
+        "ipv6",
+        "lanip",
+        "lan_ip",
+        "mac",
+        "management_ip",
+        "managementip",
+        "interface_ip",
+        "interfaceip",
+        "address",
+        "power_state",
+        "powerstate",
+        "role",
+        "version",
+        "firmware",
+    ]
+)
 
 # Stable identifiers. A display name alongside one of these is redundant and
 # mutable -- renaming the object produces a second audit row for one node.
-IDENTITY_KEYS = frozenset([
-    "id", "moid", "serial", "serial_number", "object_guid", "guid", "uuid",
-    "ansible_product_serial", "instance_id", "arn",
-])
+IDENTITY_KEYS = frozenset(
+    [
+        "id",
+        "moid",
+        "serial",
+        "serial_number",
+        "object_guid",
+        "guid",
+        "uuid",
+        "ansible_product_serial",
+        "instance_id",
+        "arn",
+    ]
+)
 
 # Human-facing labels. Not volatile enough to reject on their own -- for some
 # resources a name is the only identity there is -- but redundant and harmful
@@ -101,6 +129,7 @@ MODULES = sorted(QUERIES)
 # Minimal jq source handling -- brace matching, not a parser. Enough to find
 # two object literals and enumerate their value expressions.
 # --------------------------------------------------------------------------
+
 
 def strip_comments(source):
     lines = []
@@ -139,7 +168,7 @@ def balanced_block(source, start=0):
         elif char == "}":
             depth -= 1
             if depth == 0:
-                return source[open_at:index + 1], index
+                return source[open_at : index + 1], index
         index += 1
     return source[open_at:], len(source)
 
@@ -195,7 +224,7 @@ def split_pairs(block):
         if cut < 0:
             pairs.append((part.strip('"'), None))
         else:
-            pairs.append((part[:cut].strip().strip('"'), part[cut + 1:].strip()))
+            pairs.append((part[:cut].strip().strip('"'), part[cut + 1 :].strip()))
     return pairs
 
 
@@ -219,8 +248,10 @@ def sub_object(expression):
     return dict(split_pairs(block)) if block else {}
 
 
-READERS = re.compile(r"\b(?:test|match|capture|contains|split|startswith"
-                     r"|endswith|ltrimstr|rtrimstr|sub|gsub|inside)\s*\(")
+READERS = re.compile(
+    r"\b(?:test|match|capture|contains|split|startswith"
+    r"|endswith|ltrimstr|rtrimstr|sub|gsub|inside)\s*\("
+)
 
 
 def strip_reader_calls(expression):
@@ -246,7 +277,7 @@ def strip_reader_calls(expression):
                 if depth == 0:
                     break
             index += 1
-        text = text[:found.start()] + " " + text[index + 1:]
+        text = text[: found.start()] + " " + text[index + 1 :]
 
 
 def emitted_literals(expression):
@@ -299,7 +330,7 @@ def split_alternatives(expression):
             depth += 1
         elif char in "}])":
             depth -= 1
-        elif char == "/" and depth == 0 and text[index:index + 2] == "//":
+        elif char == "/" and depth == 0 and text[index : index + 2] == "//":
             parts.append(text[start:index].strip())
             index += 2
             start = index
@@ -348,8 +379,16 @@ def concatenates_a_literal(expression):
     return any(re.fullmatch(r'"[^"]*"', operand) for operand in operands)
 
 
-SAFE_FILTERS = ("ascii_downcase", "ascii_upcase", "tostring", "tojson",
-                "tonumber", "length", "ltrimstr", "rtrimstr")
+SAFE_FILTERS = (
+    "ascii_downcase",
+    "ascii_upcase",
+    "tostring",
+    "tojson",
+    "tonumber",
+    "length",
+    "ltrimstr",
+    "rtrimstr",
+)
 
 
 def balanced_prefix(text, close):
@@ -366,7 +405,7 @@ def balanced_prefix(text, close):
         elif text[index] == "(":
             depth -= 1
             if depth == 0:
-                return text[index + 1:close]
+                return text[index + 1 : close]
         index -= 1
     return None
 
@@ -381,10 +420,7 @@ def pipeline_is_safe(alternative, paths):
         head = head[1:-1].strip()
     if head not in paths:
         return False
-    return all(
-        any(stage.startswith(name) for name in SAFE_FILTERS)
-        for stage in stages[1:]
-    )
+    return all(any(stage.startswith(name) for name in SAFE_FILTERS) for stage in stages[1:])
 
 
 def proven_non_null(query):
@@ -401,7 +437,8 @@ def proven_non_null(query):
 
     def record(candidate):
         alternatives = [
-            alternative for alternative in split_alternatives(candidate)
+            alternative
+            for alternative in split_alternatives(candidate)
             if alternative and alternative != "null"
         ]
         if len(alternatives) == 1:
@@ -411,17 +448,13 @@ def proven_non_null(query):
 
     for match in re.finditer(r"select\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)", source):
         condition = match.group(1)
-        for inner in re.finditer(
-            r"(\([^()]*\)|\$?[\w.\[\]]+)\s*!=\s*null", condition
-        ):
+        for inner in re.finditer(r"(\([^()]*\)|\$?[\w.\[\]]+)\s*!=\s*null", condition):
             record(inner.group(1))
         if re.search(r"(?:^|[\s(])\.\s*!=\s*null", condition):
             paths.add(".")
         # `select((.x | type) == "string")` -- null has type "null", so passing
         # this proves .x is not null.
-        for inner in re.finditer(
-            r"\(\s*(\$?[\w.\[\]]+)\s*\|\s*type\s*\)\s*==", condition
-        ):
+        for inner in re.finditer(r"\(\s*(\$?[\w.\[\]]+)\s*\|\s*type\s*\)\s*==", condition):
             paths.add(inner.group(1))
         # `select(.x | test("..."))` -- test() raises on null, so reaching the
         # record at all proves .x was a string.
@@ -443,9 +476,7 @@ def proven_non_null(query):
         inner = balanced_prefix(source, match.start())
         if inner is not None:
             bindings.append((inner.strip(), match.group(1)))
-    for match in re.finditer(
-        r"(?<![)\w])(\$?[\w.\[\]]+)\s+as\s+(\$[A-Za-z_]\w*)", source
-    ):
+    for match in re.finditer(r"(?<![)\w])(\$?[\w.\[\]]+)\s+as\s+(\$[A-Za-z_]\w*)", source):
         bindings.append((match.group(1), match.group(2)))
 
     while True:
@@ -474,20 +505,20 @@ def can_be_null(expression, proven):
         if alternative == "null":
             continue
         if re.fullmatch(r'"[^"]*"|\{\}|\[\]|-?\d+|true|false', alternative):
-            return False            # a non-null literal ends the chain
+            return False  # a non-null literal ends the chain
         if concatenates_a_literal(alternative):
-            return False            # null is the identity for jq's `+`
+            return False  # null is the identity for jq's `+`
         if alternative in paths:
-            return False            # proven non-null by an earlier guard
+            return False  # proven non-null by an earlier guard
         if "tostring" in alternative or "tojson" in alternative:
-            return False            # coerced to a string
+            return False  # coerced to a string
         if pipeline_is_safe(alternative, paths):
-            return False            # `<proven> | ascii_downcase` and friends
+            return False  # `<proven> | ascii_downcase` and friends
         if not PATH.findall(alternative):
-            return False            # no path reference, cannot be null
+            return False  # no path reference, cannot be null
 
     if any(chain <= set(alternatives) for chain in chains):
-        return False                # a guard proved this exact chain non-null
+        return False  # a guard proved this exact chain non-null
 
     return True
 
@@ -495,6 +526,7 @@ def can_be_null(expression, proven):
 # --------------------------------------------------------------------------
 # Tests
 # --------------------------------------------------------------------------
+
 
 def test_query_file_exists_and_parses():
     assert os.path.isfile(QUERY_FILE), "%s is missing" % QUERY_FILE
@@ -594,14 +626,14 @@ def test_canonical_facts_holds_identity_only(module):
 
     module_name = module.split(".")[-1]
     discriminators = sorted(
-        key for key, value in fields.items()
+        key
+        for key, value in fields.items()
         if re.fullmatch(r'"%s"' % re.escape(module_name), (value or "").strip())
     )
     assert not discriminators, (
         "%s: canonical_facts.%s is the module's own name. One physical node "
         "touched by two modules in this collection then produces two audit "
-        "rows. Move it to `facts`."
-        % (module, ", ".join(discriminators))
+        "rows. Move it to `facts`." % (module, ", ".join(discriminators))
     )
 
 
