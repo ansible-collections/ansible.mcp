@@ -21,7 +21,8 @@
       Expected: {{ expected_run_tool_result | to_nice_json }}
   vars:
     expected_run_tool_result:
-      - canonical_facts:
+      - name: "awslabs.iam-mcp-server:list_groups"
+        canonical_facts:
           server_name: "awslabs.iam-mcp-server"
           tool_name: "list_groups"
         facts:
