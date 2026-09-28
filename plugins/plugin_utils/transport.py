@@ -155,7 +155,7 @@ class Stdio(Transport):
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise AnsibleConnectionFailure(
-                        f"MCP server response timeout after {self._command_timeout} seconds."
+                        f"MCP server response timeout after {timeout} seconds."
                     )
 
                 rfd, wfd, efd = select.select([self._process.stdout], [], [], remaining)
