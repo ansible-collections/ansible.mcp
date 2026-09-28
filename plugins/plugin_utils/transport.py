@@ -169,7 +169,7 @@ class Stdio(Transport):
                 else:
                     # Process has timeout
                     raise AnsibleConnectionFailure(
-                        f"MCP server response timeout after {self._command_timeout} seconds."
+                        f"MCP server response timeout after {timeout} seconds."
                     )
         return response
 
