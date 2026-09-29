@@ -1,0 +1,34 @@
+bugfixes:
+  - >-
+    stdio transport - Read messages until the response whose ``id`` matches the
+    request instead of returning the first message received. Servers may emit
+    JSON-RPC notifications at any time, and servers built on the MCP Go SDK
+    (such as the GitHub MCP server) flush queued ``list_changed`` notifications
+    ahead of the response to the first list request. Those notifications were
+    returned to the caller as if they were the response, and because they carry
+    no ``result`` field ``tools_info`` failed with ``Failed to list tools -
+    Error in list tools`` on the first call against such a server. The whole
+    exchange stays bounded by ``persistent_command_timeout`` so that a server
+    which only sends notifications times out rather than looping forever
+    (https://github.com/ansible-collections/ansible.mcp/pull/85).
+  - >-
+    stdio transport - Keep unread stdout bytes buffered between reads. Messages
+    that arrived in the same chunk as a preceding message were discarded, which
+    dropped the response whenever a server wrote its notifications and its
+    response together
+    (https://github.com/ansible-collections/ansible.mcp/pull/85).
+  - >-
+    stdio transport - Skip only the offending line when stdout contains output
+    that is not valid JSON, rather than discarding everything buffered behind
+    it, and report end-of-file on stdout instead of waiting for the timeout
+    (https://github.com/ansible-collections/ansible.mcp/pull/85).
+  - >-
+    stdio transport - Clear the stdout buffer when connecting, so that bytes
+    left over from a server process that has gone away are not read back as
+    messages from its replacement
+    (https://github.com/ansible-collections/ansible.mcp/pull/85).
+  - >-
+    stdio transport - Reject a request payload that carries no ``id``. Such a
+    payload is a notification, and every notification read back would compare
+    equal to it and be returned as if it were the response
+    (https://github.com/ansible-collections/ansible.mcp/pull/85).

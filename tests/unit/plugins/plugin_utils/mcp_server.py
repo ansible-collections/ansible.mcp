@@ -20,6 +20,12 @@ import time
 notifications = 0
 
 
+def write(payload):
+    """Write a single JSON message to stdout."""
+    sys.stdout.write(json.dumps(payload) + "\n")
+    sys.stdout.flush()
+
+
 for line in sys.stdin:
     data = json.loads(line)
     method = data.get("method")
@@ -27,20 +33,40 @@ for line in sys.stdin:
     if method == "notify":
         notifications += 1
     elif method == "read_notifications":
-        result = json.dumps(dict(notifications=notifications)) + "\n"
-        sys.stdout.write(result)
-        sys.stdout.flush()
+        write(dict(id=data.get("id"), notifications=notifications))
     elif method == "hello":
         name = data.get("name")
         server_name = os.environ.get("MCP_SERVER_NAME")
-        result = json.dumps(dict(message=f"Hello {name} from {server_name}.")) + "\n"
-        sys.stdout.write(result)
-        sys.stdout.flush()
+        write(dict(id=data.get("id"), message=f"Hello {name} from {server_name}."))
     elif method == "date":
         today = datetime.datetime.now().strftime("%d%m%Y")
-        result = json.dumps(dict(date=f"The date of today is {today}")) + "\n"
-        sys.stdout.write(result)
-        sys.stdout.flush()
+        write(dict(id=data.get("id"), date=f"The date of today is {today}"))
     elif method == "timeout":
         value = data.get("value")
         time.sleep(int(value) + 3)
+    elif method == "notify_then_respond":
+        # Mimics servers (e.g. the GitHub MCP server) that flush queued
+        # notifications ahead of the response to the first list request.
+        for index in range(int(data.get("count", 3))):
+            write(
+                dict(
+                    jsonrpc="2.0",
+                    method=f"notifications/{index}/list_changed",
+                    params={},
+                )
+            )
+        write(dict(jsonrpc="2.0", id=data.get("id"), result=dict(ok=True)))
+    elif method == "stale_then_respond":
+        # A late response to an earlier request must not be mistaken for the
+        # response to the current one.
+        write(dict(jsonrpc="2.0", id=data.get("id") - 1, result=dict(stale=True)))
+        write(dict(jsonrpc="2.0", id=data.get("id"), result=dict(ok=True)))
+    elif method == "noise_then_respond":
+        # Servers that log to stdout emit lines that are not valid JSON.
+        sys.stdout.write("this line is not json\n")
+        sys.stdout.flush()
+        write(dict(jsonrpc="2.0", id=data.get("id"), result=dict(ok=True)))
+    elif method == "flood":
+        # Never sends a response, only notifications, as fast as it can.
+        while True:
+            write(dict(jsonrpc="2.0", method="notifications/noise", params={}))
