@@ -15,6 +15,9 @@ server.
 - **`db_server_name`**       - The name of the database Server.
 - **`db_name`**              - The name of the database.
 
+The SQL administrator password must be supplied through the `AZURE_SQL_ADMIN_PASSWORD` environment variable. It is
+not stored in the inventory or playbook.
+
 ## Usage
 
 1. Log to Azure using the following
@@ -22,7 +25,14 @@ server.
    az login
    ```
 
-2. Deploy the resource
+2. Set the SQL administrator password
+   ```bash
+   read -rsp "Azure SQL administrator password: " AZURE_SQL_ADMIN_PASSWORD
+   export AZURE_SQL_ADMIN_PASSWORD
+   echo
+   ```
+
+3. Deploy the resource
    ```bash
    ansible-playbook -i inventory.yaml playbook.yaml
    ```

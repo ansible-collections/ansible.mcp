@@ -8,9 +8,15 @@
     ansible_mcp_manifest_path: "{{ playbook_dir }}/manifest.json"
 
     db_admin_login: "ansible"
-    db_admin_password: "_AZe=MmV~F0)Z4<B"
+    db_admin_password: "{{ lookup('ansible.builtin.env', 'AZURE_SQL_ADMIN_PASSWORD') }}"
 
   tasks:
+    - name: Validate Azure SQL administrator password
+      ansible.builtin.assert:
+        that:
+          - db_admin_password | length > 0
+        fail_msg: "Set AZURE_SQL_ADMIN_PASSWORD before running this playbook."
+
     - name: Create SQL server instance
       ansible.mcp.run_tool:
         name: sql
@@ -24,6 +30,7 @@
             server: "{{ db_server_name }}"
             administrator-login: "{{ db_admin_login }}"
             administrator-password: "{{ db_admin_password }}"
+      no_log: true
 
     - name: Create SQL database
       ansible.mcp.run_tool:
