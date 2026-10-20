@@ -94,8 +94,26 @@ The classification logic lives in `plugins/plugin_utils/tool_classification.py` 
 | Input | Binds top-level `.server_name` as `$sn`, then iterates `.tools[]`. |
 | Filter | `select(.name != null)` per element. |
 | `name` | `($sn // "UNKNOWN") + ":" + .name` (e.g. `github:list_issues`); falls back to `UNKNOWN:` when `server_name` is absent. |
-| `canonical_facts` | `server_name: $sn`, `tool_name: .name` -- one event per tool. |
+| `canonical_facts` | `server_name: ($sn // "UNKNOWN")`, `tool_name: .name` -- one event per tool. The fallback is required, not cosmetic: a `null` anywhere inside `canonical_facts` makes the controller's `get_hashable_form()` raise `UnhashableFacts`, and the record is discarded. |
 | `facts` | `device_type: "tool"`, `infra_bucket: "mcp"`. |
+
+## Constraints the controller imposes
+
+The controller consumes this file in `awx/main/tasks/host_indirect.py`. Three of
+its requirements silently discard a record rather than failing the job:
+
+| Requirement | What happens if it is not met |
+|---|---|
+| Top-level `name` is not `null` | `if name is None: continue` -- record dropped, warning logged once per module. |
+| `canonical_facts` is present and non-empty | `if not data.get('canonical_facts'): continue` -- record dropped. |
+| **No `null` anywhere inside `canonical_facts`** | `get_hashable_form()` raises `UnhashableFacts`; record dropped, logged **once per job at INFO**. |
+
+`canonical_facts` is also the sole deduplication key, so it must contain stable
+identity only -- any mutable value in it counts the same node again every time it
+changes. Put mutable attributes in `facts`, which is not hashed.
+
+`tests/unit/audit/test_event_query_contract.py` asserts all of the above
+statically, with no credentials and no live MCP server, on every change.
 
 ## Why This Is a Good Practice
 

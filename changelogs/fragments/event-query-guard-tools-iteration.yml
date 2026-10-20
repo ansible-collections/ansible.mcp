@@ -1,0 +1,10 @@
+---
+bugfixes:
+  - event_query - ``tools_info`` iterated ``.tools`` without guarding it. The
+    controller runs the query over every event the module produces and does not
+    filter on the task having succeeded, so a failed or skipped task reached the
+    query with no ``.tools`` and ``.tools[]`` raised ``Cannot iterate over
+    null``. The controller caught it, logged a warning and incremented
+    ``indirect_node_jq_query_errors`` before dropping that event's records.
+    ``(.tools // [])[]`` yields nothing for those results and is unchanged for
+    every successful one.

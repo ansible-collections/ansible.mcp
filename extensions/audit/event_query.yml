@@ -32,12 +32,12 @@ ansible.mcp.server_info:
 
 ansible.mcp.tools_info:
   query: >-
-    .server_name as $sn | .tools[]
+    .server_name as $sn | (.tools // [])[]
     | select(.name != null)
     | {
         name: (($sn // "UNKNOWN") + ":" + .name),
         canonical_facts: {
-          server_name: $sn,
+          server_name: ($sn // "UNKNOWN"),
           tool_name: .name
         },
         facts: {
