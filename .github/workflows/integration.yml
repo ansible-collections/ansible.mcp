@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
@@ -16,7 +16,6 @@ on:
 
 jobs:
   integration:
-    environment: protected # requires manual approval within GitHub Actions to proceed
     env:
       source: "./source"
       python_version: "3.13"
@@ -40,28 +39,6 @@ jobs:
           source_path: ${{ env.source }}
 
       - uses: ansible/ansible-test-auth@008750a5bf07124c3ab86d30d73d7319d7518f36 # v1.0.0
-
-      - name: Create integration config file
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        env:
-            GH_PAT_SECRET: ${{ secrets.ANSIBLE_MCP_GITHUB_PAT }}
-            INTEGRATION_CONFIG_PATH: "${{ steps.install-collection.outputs.collection_path }}/tests/integration/integration_config.yml"
-        with:
-            script: |
-                const fs = require('fs');
-                const path = require('path');
-
-                // 1. Retrieve data from environment variables
-                const secret = process.env.GH_PAT_SECRET;
-                const fileName = process.env.INTEGRATION_CONFIG_PATH;
-
-                try {
-                    // 2. Write the file
-                    fs.writeFileSync(fileName, `github_mcp_pat: ${secret}`, 'utf8');
-                    console.log(`Successfully created ${fileName}`);
-                } catch (err) {
-                    core.setFailed(`Failed to write file: ${err.message}`);
-                }
 
       - name: Install collection ansible.utils
         run: ansible-galaxy collection install ansible.utils -p /home/runner/.ansible/collections/ --force

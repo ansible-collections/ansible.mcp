@@ -1,21 +1,17 @@
 ---
-- name: Test server_info with GitHub MCP server
-  hosts: github
+- name: Test server_info with Local MCP server
+  hosts: local
   gather_facts: false
   tasks:
-    - name: Retrieve server info from GitHub MCP server
+    - name: Retrieve server info
       ansible.mcp.server_info:
-      register: github_server_info
+      register: local_server_info
 
-    - name: Verify GitHub server_info result succeeded
+    - name: Verify Local server info
       ansible.builtin.assert:
         that:
-          - not github_server_info.failed | default(false)
-          - github_server_info.server_info is defined
-          - github_server_info.server_info.serverInfo is defined
-          - github_server_info.server_info.serverInfo.name is defined
-          - github_server_info.server_info.serverInfo.version is defined
-        fail_msg: "GitHub server_info does not contain expected structure"
+          - local_server_info.server_info.serverInfo.name == 'ansible-mcp-local-server'
+          - local_server_info.server_info.serverInfo.version == '1.0.a-dev'
 
 - name: Test server_info with AWS IAM MCP server
   hosts: aws

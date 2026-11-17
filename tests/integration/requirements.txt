@@ -1,4 +1,6 @@
 # required for aws mcp server
 uv
+# required for local mcp server
+mcp==2.3.0
 # Used for indirect node count tests targets
 jq

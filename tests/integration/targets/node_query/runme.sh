@@ -15,7 +15,7 @@ export ANSIBLE_ROLES_PATH="../"
 trap 'cleanup'  ERR
 
 # Configure test environment
-ansible-playbook setup.yml -e '@../../integration_config.yml' "$@"
+ansible-playbook setup.yml "$@"
 
 # Run tests
 ansible-playbook test.yml -i inventory.yml "$@"
