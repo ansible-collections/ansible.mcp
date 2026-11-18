@@ -1,6 +1,6 @@
 ---
-- name: Run ansible.mcp.tools_info tests
-  hosts: github
+- name: Run ansible.mcp.tools_info tests for local server
+  hosts: local
   gather_facts: false
 
   tasks:
@@ -12,7 +12,25 @@
       ansible.builtin.assert:
         that:
           - '"server_name" in result'
-          - result.server_name == "github-mcp-server"
+          - result.server_name == "ansible-mcp-local-server"
           - '"tools" in result'
           - result.tools | length > 0
-          - result.tools | selectattr('name', 'equalto', 'pull_request_read') | list | length == 1
+          - result.tools | selectattr('name', 'equalto', 'calculate_sum') | list | length == 1
+
+- name: Run ansible.mcp.tools_info tests
+  hosts: aws
+  gather_facts: false
+
+  tasks:
+    - name: List tools from MCP servers
+      ansible.mcp.tools_info:
+      register: result
+
+    - name: Validate that the module response is as expected
+      ansible.builtin.assert:
+        that:
+          - '"server_name" in result'
+          - result.server_name == "awslabs.iam-mcp-server"
+          - '"tools" in result'
+          - result.tools | length > 0
+          - result.tools | selectattr('name', 'equalto', 'list_users') | list | length == 1

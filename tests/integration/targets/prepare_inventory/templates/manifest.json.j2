@@ -1,0 +1,17 @@
+{
+  "aws": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["awslabs.iam-mcp-server@latest"],
+    "description": "AWS IAM MCP Server - Manage AWS IAM resources through MCP protocol"
+  },
+  "local": {
+    "type": "stdio",
+    "command": "{{ ansible_python_interpreter }}",
+    "args": [
+      "{{ role_path }}/files/server.py"
+    ],
+    "description": "My local testing MCP server run via plain Python"
+  }
+}
+

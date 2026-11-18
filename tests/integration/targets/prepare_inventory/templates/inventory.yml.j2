@@ -2,14 +2,10 @@ all:
   children:
     mcp_servers:
       hosts:
-{% if 'github' in ansible_mcp_hosts %}
-        github:
+        local:
           ansible_connection: ansible.mcp.mcp
-          ansible_mcp_server_name: github
-          ansible_mcp_bearer_token: {{ github_mcp_pat }}
-          ansible_mcp_manifest_path: {{ role_path }}/files/manifest.json
-{% endif %}
-{% if 'aws' in ansible_mcp_hosts %}
+          ansible_mcp_server_name: local
+          ansible_mcp_manifest_path: {{ manifest_path.path }}
         aws:
           ansible_connection: ansible.mcp.mcp
           ansible_mcp_server_name: aws
@@ -28,5 +24,4 @@ all:
             AWS_SESSION_TOKEN: "{{ security_token }}"
 {% endif %}
             FASTMCP_LOG_LEVEL: "ERROR"
-          ansible_mcp_manifest_path: {{ role_path }}/files/manifest.json
-{% endif %}
+          ansible_mcp_manifest_path: {{ manifest_path.path }}
