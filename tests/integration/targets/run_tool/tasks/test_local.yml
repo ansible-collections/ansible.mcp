@@ -1,0 +1,26 @@
+---
+- name: Calculate sum of 2 numbers
+  ansible.mcp.run_tool:
+    name: calculate_sum
+    args:
+      a: 10
+      b: 30
+  register: result
+
+- ansible.builtin.debug:
+    var: result
+
+- name: Verify tool result
+  ansible.builtin.assert:
+    that:
+      - result is not changed
+      - '"server_name" in result'
+      - result.server_name == "ansible-mcp-local-server"
+      - '"tool_name" in result'
+      - result.tool_name == "calculate_sum"
+      - '"content" in result'
+      - result.content | length == 1
+      - result.content.0.text == "40.0"
+      - result.content.0.type == "text"
+    fail_msg: "calculate_sum tool call failed"
+    success_msg: "calculate_sum tool call succeeded"
