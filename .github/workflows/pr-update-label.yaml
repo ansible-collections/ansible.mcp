@@ -51,17 +51,27 @@ jobs:
           fi
 
       - name: Add 'needs_triage' label
-        uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
         if: steps.compute-variables.outputs.LABEL_ACTION == 'add_label'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: needs_triage
-          number: ${{ steps.compute-variables.outputs.PR_NUMBER }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.compute-variables.outputs.PR_NUMBER }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/${REPO}/issues/${PR_NUMBER}/labels" \
+            -f "labels[]=needs_triage" --silent
 
       - name: Remove 'needs_triage' label if the pr is a draft
-        uses: actions-ecosystem/action-remove-labels@2ce5d41b4b6aa8503e285553f75ed56e0a40bae0 # v1.3.0
         if: steps.compute-variables.outputs.LABEL_ACTION == 'remove_label'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: needs_triage
-          number: ${{ steps.compute-variables.outputs.PR_NUMBER }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.compute-variables.outputs.PR_NUMBER }}
+        run: |
+          set -euo pipefail
+          # DELETE on a label that is not applied returns 404, so check first.
+          if gh api "repos/${REPO}/issues/${PR_NUMBER}/labels" --jq '.[].name' \
+             | grep -qx needs_triage; then
+            gh api --method DELETE \
+              "repos/${REPO}/issues/${PR_NUMBER}/labels/needs_triage" --silent
+          fi
