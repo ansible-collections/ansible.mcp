@@ -1,0 +1,77 @@
+---
+name: Update PR label
+
+on:
+  workflow_run:
+    workflows: ["Determine PR Label"]
+    types: [completed]
+
+permissions:
+  actions: read
+  pull-requests: write
+
+jobs:
+  update-label:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Download label metadata
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: pr-label-data
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Compute variables
+        id: compute-variables
+        run: |
+          set -euo pipefail
+          echo "PR_NUMBER=$(cat pr_number.txt)" >> "$GITHUB_OUTPUT"
+          echo "LABEL_ACTION=$(cat label.txt)" >> "$GITHUB_OUTPUT"
+
+      # The metadata above is produced by a workflow definition that a pull
+      # request author can modify, so the PR number it carries is untrusted.
+      # Confirm it refers to the pull request that actually triggered this run.
+      - name: Validate PR number
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.compute-variables.outputs.PR_NUMBER }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::Not a valid pull request number: '${PR_NUMBER}'"
+            exit 1
+          fi
+          pr_head_sha="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.head.sha')"
+          if [[ "$pr_head_sha" != "$HEAD_SHA" ]]; then
+            echo "::error::PR #${PR_NUMBER} head ${pr_head_sha} does not match the triggering run ${HEAD_SHA}"
+            exit 1
+          fi
+
+      - name: Add 'needs_triage' label
+        if: steps.compute-variables.outputs.LABEL_ACTION == 'add_label'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.compute-variables.outputs.PR_NUMBER }}
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/${REPO}/issues/${PR_NUMBER}/labels" \
+            -f "labels[]=needs_triage" --silent
+
+      - name: Remove 'needs_triage' label if the pr is a draft
+        if: steps.compute-variables.outputs.LABEL_ACTION == 'remove_label'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.compute-variables.outputs.PR_NUMBER }}
+        run: |
+          set -euo pipefail
+          # DELETE on a label that is not applied returns 404, so check first.
+          if gh api "repos/${REPO}/issues/${PR_NUMBER}/labels" --jq '.[].name' \
+             | grep -qx needs_triage; then
+            gh api --method DELETE \
+              "repos/${REPO}/issues/${PR_NUMBER}/labels/needs_triage" --silent
+          fi

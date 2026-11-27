@@ -1,0 +1,41 @@
+---
+name: Determine PR Label
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - converted_to_draft
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  determine-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manage needs_triage label
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ACTION: ${{ github.event.action }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          set -euo pipefail
+          echo "$PR_NUMBER" > pr_number.txt
+          if [[ "$ACTION" == "converted_to_draft" || "$IS_DRAFT" == "true" ]]; then
+            echo "remove_label" > label.txt
+          elif [[ "$ACTION" == "opened" || "$ACTION" == "reopened" || "$ACTION" == "ready_for_review" ]]; then
+            echo "add_label" > label.txt
+          else
+            echo "none" > label.txt
+          fi
+
+      - name: Upload label metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pr-label-data
+          path: |
+            pr_number.txt
+            label.txt
